@@ -1,0 +1,12 @@
+[
+  {
+    ip: "192.168.100.1",
+    comunidad: "ESCOM",
+    nombre: "R1"
+  },
+  {
+    ip: "192.168.100.2",
+    comunidad: "ESCOM",
+    nombre: "R2"
+  }
+]

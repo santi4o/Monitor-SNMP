@@ -1,0 +1,17 @@
+extends ../Layout_Users.jade
+block content
+  h2 Añadir Nuevo Agente SNMP
+  form(action="/nuevo_agente", method="POST")
+      center
+          div(class="form-group")
+              label(for="ip_agente") IP: 
+              input(type="text", name="ip_agente", id="ip_agente", placeholder="x.x.x.x/x",class="form-control texto")
+          div(class="form-group") 
+              label(for="community") Comunidad: 
+              input(type="text", name="community", id="community", placeholder="Comunidad",class="form-control texto")
+          div
+              input(type="submit", value="Agregar", class="btn btn-danger")
+  br
+  br
+  h3 Agente Añadido
+        

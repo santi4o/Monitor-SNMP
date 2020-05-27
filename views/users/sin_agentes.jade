@@ -1,0 +1,13 @@
+extends ../Layout_Users.jade
+block content
+  script.
+    function nuevo() {
+      window.location.href = "/nuevo_agente";
+    }
+  button(onclick='nuevo()', class="btn btn-success") Añadir Agente SNMP
+  br
+  br
+  br
+  h2 No hay Agentes SNMP registrados
+  img(src="/images/no_data.png" class="Node")
+    

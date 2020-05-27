@@ -1,0 +1,39 @@
+extends ../Layout_Users.jade
+block content
+  script.
+    function nuevo() {
+      window.location.href = "/nuevo_agente";
+    }
+    $(document).ready(function(){
+      $.getJSON('/agentes', { get_param: 'value' }, function(json) {
+        //var table = "<table id='customers'><thead><tr><th>ip</th>"
+        //          + "<th class='absorbing-column'>comunidad</th></tr></thead>"
+        //          + "<tbody id='tbody'></tbody></table>"
+        //$('#div1').append(table);
+        $.each(json, function (index, item) {
+        var eachrow = "<tr>"
+                    + "<td>" + item['ip'] + "</td>"
+                    + "<td>" + item['comunidad'] + "</td>"
+                    + "</tr>";
+        $('#tbody').append(eachrow);
+        });
+      });
+      //$.getJSON('/agentes', { get_param: 'value' }, function(data) {
+      //$.each(data, function(index, element) {
+      //$('body').append($('<div>', {
+      //text: element.comunidad
+      //}));
+      //});
+      //});
+    });
+  button(onclick='nuevo()', class="btn btn-success") Añadir Agente SNMP
+  br
+  br
+  br
+  #div1
+    table#customers
+      thead
+        tr
+          th ip
+          th.absorbing-column comunidad
+      tbody#tbody
