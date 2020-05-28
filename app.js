@@ -71,6 +71,7 @@ app.get("/nuevo_agente", function(req,res){ //Metodo GET, la diagonal invertida 
 
 });
 
+
 app.get("/agentes", function(req,res){ //Metodo GET, la diagonal invertida representa la página principal
     if (String(req.session.user_id) == "undefined") {
         res.redirect("/");
@@ -132,6 +133,14 @@ app.post("/nuevo_agente", function(req,res){ //Metodo POST para parametros que s
   // in close event we are sure that stream from child process is closed
   python.on('close', (code) => {
     console.log(`child process close all stdio with code ${code}`);
+    if (code === 0) {
+      //send json with agent info
+      var data = require('./agentinfo.json');
+      res.json(data);
+      //res.end("it worked!");
+    } else {
+      res.status(500).send('showAlert');
+    }
 
 
 
@@ -154,7 +163,29 @@ app.post("/nuevo_agente", function(req,res){ //Metodo POST para parametros que s
 
     //res.render("mostrar_agentes")
     //res.status(500).send('showAlert');
-    res.end("it worked!");
+
+  });
+});
+
+//Guardar Agente en MongoDB
+app.post("/guardar_agente", function(req, res) {
+  MongoClient.connect(url, function(err, db) {
+    if (err) {
+      throw err;
+      res.status(500).send('showAlert');
+    }
+    var dbo = db.db("MonitorRed");
+    var myobj = { ip: req.body.agente.ip, comunidad: req.body.agente.community };
+    //var myobj = req;
+    dbo.collection("AgentesSNMP").insertOne(myobj, function(err, res) {
+      if (err) {
+        throw err;
+        res.status(500).send('showAlert');
+      }
+      console.log("1 document inserted");
+      db.close();
+    });
+    res.redirect('/admin_agentes');
   });
 });
 
