@@ -1,7 +1,19 @@
 extends ../Layout_Users.jade
 block content
   h2 Añadir Nuevo Agente SNMP
-  form(action="/nuevo_agente", method="POST")
+  //form(action="/nuevo_agente", method="POST")
+  script.
+      function myFunction() {
+          event.preventDefault(); // Stops browser from navigating away from page
+          var data;
+          data = $(this).parent().html();
+          // build a json object or do something with the form, store in data
+          $.post('/nuevo_agente', data, function(resp) {
+              alert(resp);
+              // do something when it was successful
+          });
+      }
+  form(onsubmit="myFunction()")
       center
           div(class="form-group")
               label(for="ip_agente") IP: 

@@ -118,8 +118,12 @@ app.get("/admin_agentes", function(req,res){ //Metodo GET, la diagonal invertida
 //Registro de nuevo ip_agente
 app.post("/nuevo_agente", function(req,res){ //Metodo POST para parametros que se invocara con la directiva users
   // spawn new child process to call the python script
-  const python = spawn('python', ['snmp/pythontest1.py', "aldo"]);
+  const python = spawn('python', ['snmp/snmpGet.py',
+                                  req.body.agente.ip,
+                                  req.body.agente.community]
+                      );
   // collect data from script
+  var agente;
   python.stdout.on('data', function (data) {
     console.log('Pipe data from python script ...');
     console.log(data.toString())
@@ -128,17 +132,29 @@ app.post("/nuevo_agente", function(req,res){ //Metodo POST para parametros que s
   // in close event we are sure that stream from child process is closed
   python.on('close', (code) => {
     console.log(`child process close all stdio with code ${code}`);
+
+
+
+    /*
     MongoClient.connect(url, function(err, db) {
       if (err) throw err;
       var dbo = db.db("MonitorRed");
-      var myobj = { ip: req.body.ip_agente, comunidad: req.body.community };
+      var myobj = { ip: req.body.agente.ip, comunidad: req.body.agente.community };
+      //var myobj = req;
       dbo.collection("AgentesSNMP").insertOne(myobj, function(err, res) {
         if (err) throw err;
         console.log("1 document inserted");
         db.close();
       });
     });
-    res.render("users/nuevo_agente_OK")
+    */
+
+
+
+
+    //res.render("mostrar_agentes")
+    //res.status(500).send('showAlert');
+    res.end("it worked!");
   });
 });
 

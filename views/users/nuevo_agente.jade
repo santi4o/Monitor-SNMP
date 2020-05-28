@@ -1,14 +1,81 @@
 extends ../Layout_Users.jade
+
 block content
   h2 Añadir Nuevo Agente SNMP
-  form(action="/nuevo_agente", method="POST")
+  script.
+    /*function myFunction() {
+      fetch('/nuevo_agente', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          agente: {
+            ip: $("#ip_agente").val(),
+            community: $("#community").val()
+          }
+        })
+      });
+      
+    }*/
+    $(document).ready(function() {
+      $(".lds-roller").hide();
+      $('#form1').on('submit', function (e) {
+      // keep the form from submitting synchronously
+        $(".lds-roller").show();
+        e.preventDefault();
+        var $form = $(e.currentTarget);
+
+      // submit via ajax
+        $.ajax({
+          url: $form.attr('action'),
+          method: $form.attr('method'),
+          data: $form.serialize()
+        })
+        .done(function (response) {
+          $('#form1').hide();
+          $(".lds-roller").hide();
+          //window.alert("nos some information about the agent should be displayed");
+          $.getJSON('/agentes', { get_param: 'value' }, function(json) {
+            //var table = "<table id='customers'><thead><tr><th>ip</th>"
+            //          + "<th class='absorbing-column'>comunidad</th></tr></thead>"
+            //          + "<tbody id='tbody'></tbody></table>"
+            //$('#div1').append(table);
+            $.each(json, function (index, item) {
+              var eachrow = "<tr>"
+                          + "<td>" + item['ip'] + "</td>"
+                          + "<td>" + item['comunidad'] + "</td>"
+                          + "</tr>";
+              $('#tbody').append(eachrow);
+            });
+          });
+        })
+        .fail(function(error){
+          console.log('failed: ', arguments);
+          if(error.responseText == 'showAlert'){
+            alert("Please enter correct user name and password.");
+          }
+        })
+      });
+    });
+  form(method="POST", action="/nuevo_agente", id="form1")
       center
           div(class="form-group")
               label(for="ip_agente") IP: 
-              input(type="text", name="ip_agente", id="ip_agente", placeholder="x.x.x.x/x",class="form-control texto")
+              input(type="text", name="agente[ip]", id="ip_agente", placeholder="x.x.x.x/x",class="form-control texto")
           div(class="form-group") 
               label(for="community") Comunidad: 
-              input(type="text", name="community", id="community", placeholder="Comunidad",class="form-control texto")
+              input(type="text", name="agente[community]", id="community", placeholder="Comunidad",class="form-control texto")
           div
               input(type="submit", value="Agregar", class="btn btn-danger")
-        
+  .lds-roller
+    div
+    div
+    div
+    div
+    div
+    div
+    div
+    div
+  #div1
+      ul#agentinfo     
