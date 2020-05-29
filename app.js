@@ -24,6 +24,10 @@ var MongoClient = require('mongodb').MongoClient;
 var url = "mongodb://localhost:27017/";
 
 
+//var jsonagente = require('./agentinfo.json')
+var fs = require('fs');
+
+
 /*----------------------Métodos del servidor----------------------------*/
 
 
@@ -124,7 +128,7 @@ app.post("/nuevo_agente", function(req,res){ //Metodo POST para parametros que s
                                   req.body.agente.community]
                       );
   // collect data from script
-  var agente;
+  //var agente;
   python.stdout.on('data', function (data) {
     console.log('Pipe data from python script ...');
     console.log(data.toString())
@@ -135,8 +139,18 @@ app.post("/nuevo_agente", function(req,res){ //Metodo POST para parametros que s
     console.log(`child process close all stdio with code ${code}`);
     if (code === 0) {
       //send json with agent info
-      var data = require('./agentinfo.json');
-      res.json(data);
+      //agente = require('./agentinfo.json');
+
+
+      fs.readFile('./agentinfo.json', (err, data) => {
+        if (err) throw err;
+        let agente = JSON.parse(data);
+        console.log(agente);
+        res.json(agente);
+      });
+
+
+      //res.json(jsonagente);
       //res.end("it worked!");
     } else {
       res.status(500).send('showAlert');
