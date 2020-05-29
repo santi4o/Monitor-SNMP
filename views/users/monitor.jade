@@ -1,0 +1,22 @@
+extends ../Layout_Users.jade
+block content
+  script.
+    $(document).ready(function(){
+      $.getJSON('/agentes', { get_param: 'value' }, function(json) {
+        $.each(json, function (index, item) {
+          var eachrow = "<option value='" 
+                      + item['ip'] + "'>" +  item['nombre'] + ": " + item['ip']
+                      + "</option>";
+          $('#agentes').append(eachrow);
+        });
+      });
+    });
+  br
+  br
+  br
+  #div1
+    form(method='POST', action='/action_page')
+      label(for='cars') Selecciona el agente SNMP
+      select#agentes.selectpicker(name='agentes')
+      input(type='submit', value='Ver')
+

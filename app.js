@@ -118,6 +118,28 @@ app.get("/admin_agentes", function(req,res){ //Metodo GET, la diagonal invertida
     }
 });
 
+app.get("/monitor", function(req,res){ //Metodo GET, la diagonal invertida representa la página principal
+    if (String(req.session.user_id) == "undefined") {
+        res.redirect("/");
+    } else {
+      MongoClient.connect(url, function(err, db) {
+        if (err) throw err;
+        var dbo = db.db("MonitorRed");
+        collection = dbo.collection("AgentesSNMP");
+        collection.find({}).toArray((error, result) => {
+          if (error) {
+              return response.status(500).send(error);
+          }
+          if (result.length === 0) {
+            res.render('users/sin_agentes');
+          } else {
+            res.render("users/monitor");
+          }
+        });
+      });
+    }
+});
+
 /*----------------------Métodos de funcionalidad (HTTP)------------------------*/
 
 //Registro de nuevo ip_agente
@@ -155,26 +177,6 @@ app.post("/nuevo_agente", function(req,res){ //Metodo POST para parametros que s
     } else {
       res.status(500).send('showAlert');
     }
-
-
-
-    /*
-    MongoClient.connect(url, function(err, db) {
-      if (err) throw err;
-      var dbo = db.db("MonitorRed");
-      var myobj = { ip: req.body.agente.ip, comunidad: req.body.agente.community };
-      //var myobj = req;
-      dbo.collection("AgentesSNMP").insertOne(myobj, function(err, res) {
-        if (err) throw err;
-        console.log("1 document inserted");
-        db.close();
-      });
-    });
-    */
-
-
-
-
     //res.render("mostrar_agentes")
     //res.status(500).send('showAlert');
 
@@ -189,7 +191,12 @@ app.post("/guardar_agente", function(req, res) {
       res.status(500).send('showAlert');
     }
     var dbo = db.db("MonitorRed");
-    var myobj = { ip: req.body.agente.ip, comunidad: req.body.agente.community };
+    var myobj = {
+                  nombre: req.body.agente.nombre, 
+                  ip: req.body.agente.ip, 
+                  descripcion: req.body.agente.descripcion,
+                  comunidad: req.body.agente.comunidad
+                };
     //var myobj = req;
     dbo.collection("AgentesSNMP").insertOne(myobj, function(err, res) {
       if (err) {
@@ -248,6 +255,8 @@ app.post("/sign", function(req,res){  //Metodo Para desplegar la base
     }); //Devuelve una arreglo de documentos
 });
 
+
+
 //Verificación de sesión
 app.get("/logout", function(req,res){
     req.session.destroy();
@@ -259,6 +268,7 @@ app.get("/logout", function(req,res){
 app.use("/users", validation_middleware); //Middlewares
 app.use("/users", router_users); //Rutas
 //Handles no specified routes
+
 app.use(function(req, res, next){
   res.status(404);
   res.render("no_encontrada");

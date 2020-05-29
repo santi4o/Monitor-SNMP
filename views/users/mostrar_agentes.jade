@@ -6,25 +6,15 @@ block content
     }
     $(document).ready(function(){
       $.getJSON('/agentes', { get_param: 'value' }, function(json) {
-        //var table = "<table id='customers'><thead><tr><th>ip</th>"
-        //          + "<th class='absorbing-column'>comunidad</th></tr></thead>"
-        //          + "<tbody id='tbody'></tbody></table>"
-        //$('#div1').append(table);
         $.each(json, function (index, item) {
           var eachrow = "<tr>"
+                      + "<td>" + item['nombre'] + "</td>"
                       + "<td>" + item['ip'] + "</td>"
-                      + "<td>" + item['comunidad'] + "</td>"
+                      + "<td>" + item['descripcion'] + "</td>"
                       + "</tr>";
           $('#tbody').append(eachrow);
         });
       });
-      //$.getJSON('/agentes', { get_param: 'value' }, function(data) {
-      //$.each(data, function(index, element) {
-      //$('body').append($('<div>', {
-      //text: element.comunidad
-      //}));
-      //});
-      //});
     });
   button(onclick='nuevo()', class="btn btn-success") Añadir Nuevo Agente SNMP
   br
@@ -34,6 +24,7 @@ block content
     table#customers
       thead
         tr
-          th ip
-          th.absorbing-column comunidad
+          th Nombre
+          th IP
+          th Descripción
       tbody#tbody

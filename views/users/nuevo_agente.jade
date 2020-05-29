@@ -10,9 +10,10 @@ block content
       //Cuando se va a guardar el agente snmp verificado en la base de datos
       $('#form2').submit( function(ev) {
         ev.preventDefault();
-        //later you decide you want to submit
+        $("#nombre_agente2").val($("#nombre").text());
         $("#ip_agente2").val($("#ip_agente1").val());
-        $("#community2").val($("#community1").val());
+        $("#descripcion_agente2").val($("#descripcion").text());
+        $("#comunidad_agente2").val($("#community1").val());
         $(this).unbind('submit').submit()
       });
       
@@ -25,7 +26,7 @@ block content
           //window.location = this.href;
           var $form = $(e.currentTarget);
 
-      // submit via ajax
+      //petición post del formulario 1, post, '/nuevo_agente'
         $.ajax({
           url: $('#form1').attr('action'),
           method: $('#form1').attr('method'),
@@ -39,10 +40,10 @@ block content
           
           var eachrow = "<tr>"
                       + "<td>sysName</td>"
-                      + "<td>" + response['sysName'] + "</td>"
+                      + "<td id='nombre'>" + response['sysName'] + "</td>"
                       + "</tr><tr>"
                       + "<td>sysDescr</td>"
-                      + "<td>" + response['sysDescr'] + "</td>"
+                      + "<td id='descripcion'>" + response['sysDescr'] + "</td>"
                       + "</tr><tr>"
                       + "<td>ifDescr</td>"
                       + "<td>" + response['ifDescr'] + "</td>"
@@ -62,8 +63,8 @@ block content
   form(method="POST", action="/nuevo_agente", id="form1")
       center
           div(class="form-group")
-              label(for="ip_agente") IP: 
-              input(type="text", name="agente[ip]", id="ip_agente1", placeholder="x.x.x.x/x",class="form-control texto")
+              label(for="ip_agente") IPv4: 
+              input(type="text", name="agente[ip]", id="ip_agente1", placeholder="X.X.X.X",class="form-control texto")
           div(class="form-group") 
               label(for="community") Comunidad: 
               input(type="text", name="agente[community]", id="community1", placeholder="Comunidad",class="form-control texto")
@@ -87,9 +88,13 @@ block content
     form(method="POST", action="/guardar_agente", id="form2")
         center
             div(class="form-group")
-                input(type="hidden", name="agente[ip]", id="ip_agente2",class="form-control texto")
+                input(type="hidden", name="agente[nombre]", id="nombre_agente2", class="form-control texto")
+            div(class="form-group")
+                input(type="hidden", name="agente[ip]", id="ip_agente2", class="form-control texto")
             div(class="form-group") 
-                input(type="hidden", name="agente[community]", id="community2",class="form-control texto")
+                input(type="hidden", name="agente[descripcion]", id="descripcion_agente2", class="form-control texto")
+            div(class="form-group") 
+                input(type="hidden", name="agente[comunidad]", id="comunidad_agente2", class="form-control texto")
             div
                 input(type="submit", value="Agregar Agente", class="btn btn-success", id="submit1")
     
