@@ -145,7 +145,7 @@ app.get("/monitor", function(req,res){ //Metodo GET, la diagonal invertida repre
 //Registro de nuevo ip_agente
 app.post("/nuevo_agente", function(req,res){ //Metodo POST para parametros que se invocara con la directiva users
   // spawn new child process to call the python script
-  const python = spawn('python', ['snmp/snmpGet.py',
+  const python = spawn('python', ['snmp/snmpGetResourceUsage.py',
                                   req.body.agente.ip,
                                   req.body.agente.community]
                       );
