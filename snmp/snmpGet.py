@@ -13,9 +13,17 @@ errorIndication, errorStatus, errorIndex, varBinds = next(
             	CommunityData(sys.argv[2], mpModel=0),
                	UdpTransportTarget((sys.argv[1], 161)),
                	ContextData(),
+<<<<<<< HEAD
                	ObjectType(ObjectIdentity('SNMPv2-MIB', 'sysName', 0)),
                	ObjectType(ObjectIdentity('SNMPv2-MIB', 'sysDescr', 0)),
                	ObjectType(ObjectIdentity('IF-MIB', 'ifDescr', 1)),
+=======
+               	ObjectType(ObjectIdentity('.1.3.6.1.4.1.9.9.109.1.1.1.1.8.1')), #El porcentaje de ocupado de la CPU total en el periodo de cinco minutos
+			   	ObjectType(ObjectIdentity('.1.3.6.1.4.1.9.9.48.1.1.1.5.1')),#memoria usada cpu (cisco)
+			   	ObjectType(ObjectIdentity('.1.3.6.1.4.1.9.9.48.1.1.1.5.2')),#memoria usada i/o (cisco)
+			   	ObjectType(ObjectIdentity('.1.3.6.1.4.1.9.9.48.1.1.1.6.1')),#memoria libre cpu (cisco)
+				ObjectType(ObjectIdentity('.1.3.6.1.4.1.9.9.48.1.1.1.6.2')))#memoria libre i/o (cisco)
+>>>>>>> fc3506ab3a0b57bbb33545c72aa14e914b971ffd
 )
 
 if errorIndication:
