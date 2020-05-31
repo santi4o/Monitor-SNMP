@@ -1,0 +1,29 @@
+{
+  "agente" : "192.168.200.1",
+  "tiempo" :  1590883759.13 ,
+  "interfacesInfo" : [
+    {
+      "ifDescr" : "GigabitEthernet0/0",
+      "ifInOctets" :  43328.0 ,
+      "ifOutOctets" :  57677.0
+    }
+    ,
+    {
+      "ifDescr" : "GigabitEthernet0/1",
+      "ifInOctets" :  48492.0 ,
+      "ifOutOctets" :  61223.0
+    }
+    ,
+    {
+      "ifDescr" : "GigabitEthernet0/2",
+      "ifInOctets" :  5792.0 ,
+      "ifOutOctets" :  48460.0
+    }
+    ,
+    {
+      "ifDescr" : "GigabitEthernet0/3",
+      "ifInOctets" :  0.0 ,
+      "ifOutOctets" :  0.0
+    }
+  ]
+}
