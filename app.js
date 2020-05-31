@@ -140,12 +140,32 @@ app.get("/monitor", function(req,res){ //Metodo GET, la diagonal invertida repre
     }
 });
 
+
+app.post("/resourcesUtil", function(req, res) {
+  if (String(req.session.user_id) == "undefined") {
+      res.redirect("/");
+  } else{
+    MongoClient.connect(url, function(err, db) {
+      if (err) throw err;
+      var dbo = db.db("MonitorRed");
+      collection = dbo.collection("resourcesUtil");
+      collection.find({"agente":req.body.agente}).toArray((error, result) => {
+        if(error) {
+            return response.status(500).send(error);
+        }
+        console.log("enviando resourcesUtil del agente");
+        res.json(result);
+      });
+    });
+  }
+});
+
 /*----------------------Métodos de funcionalidad (HTTP)------------------------*/
 
 //Registro de nuevo ip_agente
 app.post("/nuevo_agente", function(req,res){ //Metodo POST para parametros que se invocara con la directiva users
   // spawn new child process to call the python script
-  const python = spawn('python', ['snmp/snmpGetResourceUsage.py',
+  const python = spawn('python', ['snmp/snmpGet.py',
                                   req.body.agente.ip,
                                   req.body.agente.community]
                       );
@@ -192,8 +212,8 @@ app.post("/guardar_agente", function(req, res) {
     }
     var dbo = db.db("MonitorRed");
     var myobj = {
-                  nombre: req.body.agente.nombre, 
-                  ip: req.body.agente.ip, 
+                  nombre: req.body.agente.nombre,
+                  ip: req.body.agente.ip,
                   descripcion: req.body.agente.descripcion,
                   comunidad: req.body.agente.comunidad
                 };

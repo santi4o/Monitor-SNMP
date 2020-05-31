@@ -10,13 +10,34 @@ block content
           $('#agentes').append(eachrow);
         });
       });
+      
+      $('#form1').on('submit', function (e) {
+      // keep the form from submitting synchronously
+        e.preventDefault();
+      //petición post del formulario 1, post, '/nuevo_agente'
+        $.ajax({
+          url: $('#form1').attr('action'),
+          method: $('#form1').attr('method'),
+          data: $('#form1').serialize()
+        })
+        .done(function (response) {
+          console.log(response);
+        })
+        .fail(function(error){
+          console.log('failed: ', arguments);
+          if(error.responseText == 'showAlert'){
+            alert("No se pudo establecer comunicación con el servidor");
+          }
+        })
+      });
+      
     });
   br
   br
   br
   #div1
-    form(method='POST', action='/action_page')
+    form#form1(method='POST', action='/resourcesUtil')
       label(for='cars') Selecciona el agente SNMP
-      select#agentes.selectpicker(name='agentes')
+      select#agentes.selectpicker(name='agente')
       input(type='submit', value='Ver')
-
+  #div2

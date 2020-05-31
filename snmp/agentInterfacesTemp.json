@@ -1,29 +1,17 @@
 {
-  "agente" : "192.168.200.1",
-  "tiempo" :  1590883759.13 ,
+  "agente" : "192.168.100.10",
+  "tiempo" :  1590887061.26 ,
   "interfacesInfo" : [
     {
-      "ifDescr" : "GigabitEthernet0/0",
-      "ifInOctets" :  43328.0 ,
-      "ifOutOctets" :  57677.0
+      "ifDescr" : "lo",
+      "ifInOctets" :  1078777.0 ,
+      "ifOutOctets" :  1078777.0
     }
     ,
     {
-      "ifDescr" : "GigabitEthernet0/1",
-      "ifInOctets" :  48492.0 ,
-      "ifOutOctets" :  61223.0
-    }
-    ,
-    {
-      "ifDescr" : "GigabitEthernet0/2",
-      "ifInOctets" :  5792.0 ,
-      "ifOutOctets" :  48460.0
-    }
-    ,
-    {
-      "ifDescr" : "GigabitEthernet0/3",
-      "ifInOctets" :  0.0 ,
-      "ifOutOctets" :  0.0
+      "ifDescr" : "Qualcomm Atheros AR8132 Fast Ethernet",
+      "ifInOctets" :  823775801.0 ,
+      "ifOutOctets" :  26373893.0
     }
   ]
 }

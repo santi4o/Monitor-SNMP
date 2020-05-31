@@ -15,7 +15,7 @@ errorIndication, errorStatus, errorIndex, varBinds = next(
                	ContextData(),
                	ObjectType(ObjectIdentity('SNMPv2-MIB', 'sysName', 0)),
                	ObjectType(ObjectIdentity('SNMPv2-MIB', 'sysDescr', 0)),
-               	ObjectType(ObjectIdentity('IF-MIB', 'ifDescr', 1)),
+               	ObjectType(ObjectIdentity('IF-MIB', 'ifDescr', 1)))
 )
 
 if errorIndication:
@@ -32,17 +32,17 @@ else:
 		print(' = '.join([x.prettyPrint() for x in varBind]))
 
 
-	#class Agente:
-	#	def __init__(self, sysName, sysDescr, ifDescr):
-	#		self.sysName = sysName
-	#		self.sysDescr = sysDescr
-	#		self.ifDescr = ifDescr
+	class Agente:
+		def __init__(self, sysName, sysDescr, ifDescr):
+			self.sysName = sysName
+			self.sysDescr = sysDescr
+			self.ifDescr = ifDescr
 
-	#class AgenteEncoder(JSONEncoder):
-	#	def default(self, o):
-	#		return o.__dict__
+	class AgenteEncoder(JSONEncoder):
+		def default(self, o):
+			return o.__dict__
 
-	#ag = Agente(str(varBinds[0][1]),str(varBinds[1][1]),str(varBinds[2][1]))
-	#sys.stdout = open('agentinfo.json', 'w')
-	#print(AgenteEncoder().encode(ag))
+	ag = Agente(str(varBinds[0][1]),str(varBinds[1][1]),str(varBinds[2][1]))
+	sys.stdout = open('agentinfo.json', 'w')
+	print(AgenteEncoder().encode(ag))
 sys.stdout.flush()
