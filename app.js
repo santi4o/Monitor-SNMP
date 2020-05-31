@@ -149,7 +149,10 @@ app.post("/resourcesUtil", function(req, res) {
       if (err) throw err;
       var dbo = db.db("MonitorRed");
       collection = dbo.collection("resourcesUtil");
-      collection.find({"agente":req.body.agente}).toArray((error, result) => {
+      collection.find({"agente":req.body.agente})
+        .sort({_id:-1})
+        .limit(5)
+        .toArray((error, result) => {
         if(error) {
             return response.status(500).send(error);
         }

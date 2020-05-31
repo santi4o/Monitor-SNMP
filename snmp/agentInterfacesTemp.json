@@ -1,17 +1,17 @@
 {
   "agente" : "192.168.100.10",
-  "tiempo" :  1590887061.26 ,
+  "tiempo" :  1590911603.13 ,
   "interfacesInfo" : [
     {
       "ifDescr" : "lo",
-      "ifInOctets" :  1078777.0 ,
-      "ifOutOctets" :  1078777.0
+      "ifInOctets" :  1157885.0 ,
+      "ifOutOctets" :  1157885.0
     }
     ,
     {
       "ifDescr" : "Qualcomm Atheros AR8132 Fast Ethernet",
-      "ifInOctets" :  823775801.0 ,
-      "ifOutOctets" :  26373893.0
+      "ifInOctets" :  832979495.0 ,
+      "ifOutOctets" :  27144021.0
     }
   ]
 }

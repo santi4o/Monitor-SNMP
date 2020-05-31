@@ -1,17 +1,17 @@
 {
   "agente" : "192.168.100.10",
-  "cpu" :  0.00 ,
-  "memoria" :  66.1759137485 ,
+  "cpu" :  0.11 ,
+  "memoria" :  66.2948564161 ,
   "disco" :  9 ,
   "anchoBanda" : [
     {
       "ifDescr" : "lo",
-      "utilizacion" : 0.0
+      "utilizacion" : 0.000155444740485
     }
     ,
     {
       "ifDescr" : "Qualcomm Atheros AR8132 Fast Ethernet",
-      "utilizacion" : 0.00622005391935
+      "utilizacion" : 0.000133331225833
     }
   ]
 }
