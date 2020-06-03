@@ -293,6 +293,28 @@ app.post("/nuevo_agente", function(req,res){ //Metodo POST para parametros que s
   });
 });
 
+//eliminar un agente
+app.post("/borrar_agente", function(req,res){ //Metodo POST para parametros que se invocara con la directiva users
+  MongoClient.connect(url, function(err, db) {
+    if (err) {
+      throw err;
+      res.status(500).send('showAlert');
+    }
+    //console.log("trying to remove" + req.body.agente)
+    var dbo = db.db("MonitorRed");
+    dbo.collection("AgentesSNMP").deleteOne({ip: req.body.agente},
+      function(err, res) {
+      if (err) {
+        throw err;
+        res.status(500).send('showAlert');
+      }
+      console.log("1 document deleted");
+      db.close();
+    });
+    res.end('OK');
+  });
+});
+
 //Guardar Agente en MongoDB
 app.post("/guardar_agente", function(req, res) {
   MongoClient.connect(url, function(err, db) {

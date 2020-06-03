@@ -5,12 +5,32 @@ block content
       window.location.href = "/nuevo_agente";
     }
     $(document).ready(function(){
+      $("#customers").on("click", "button", function(e) {
+        var row = $(this).closest("tr");
+        var ip = row.find("td").eq(1).text();
+        //console.log(firstCellValue);
+        $.ajax({
+          url: "/borrar_agente",
+          method: 'POST',
+          data: {
+            agente: ip
+          }
+        })
+        .done(function (response) {
+          console.log("done");
+          window.location.href = "/admin_agentes";
+        })
+        .fail(function (response) {
+          console.log("Hubo un error");
+        });
+      });
       $.getJSON('/agentes', { get_param: 'value' }, function(json) {
         $.each(json, function (index, item) {
           var eachrow = "<tr>"
                       + "<td>" + item['nombre'] + "</td>"
                       + "<td>" + item['ip'] + "</td>"
                       + "<td>" + item['descripcion'] + "</td>"
+                      + "<td> <button class='btn btn-danger'>Borrar</button> </td>"
                       + "</tr>";
           $('#tbody').append(eachrow);
         });
@@ -27,4 +47,5 @@ block content
           th Nombre
           th IP
           th Descripción
+          th
       tbody#tbody

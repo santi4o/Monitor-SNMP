@@ -120,6 +120,38 @@ block content
           chart.update();
         }
         
+        
+        //Actualiza la información en chart anchoBanda
+        chart = chartAnchoBanda;
+        label = "nuevoBW";
+        
+        for (var i = 0; i < chart.data.labels.length-1; i++) {
+          chart.data.labels[i] = chart.data.labels[i+1];
+        }
+        chart.data.labels[chart.data.labels.length-1] = label;
+        
+        for (var n = 0; n < response[0].anchoBanda.length; n++) {
+          for (var j = 0; j < chart.data.datasets.length; j++) {
+            if (chart.data.datasets[j].label == response[0].anchoBanda[n].ifDescr) {
+              console.log(chart.data.datasets[j].label + ": " + response[0].anchoBanda[n].utilizacion);
+              //chart.data.datasets[j].data.push(response[i].anchoBanda[n].utilizacion);
+              
+              
+              var newData = [];
+              //console.log("data.length = " + chart.data.datasets[0].data.length);
+              for (var i = 0; i < chart.data.datasets[j].data.length-1; i++) {
+                //chart.data.datasets[0].data[i] = chart.data.datasets[0].data[i+1];
+                newData.push(chart.data.datasets[j].data[i+1]);
+              }
+              newData.push(response[0].anchoBanda[n].utilizacion);
+              chart.data.datasets[j].data = newData;
+              break;
+            }
+          }
+        }
+        chart.update();
+        
+        
       })
       .fail(function(error){
         console.log('failed: ', arguments);
@@ -139,7 +171,7 @@ block content
       addData();
       setTimeout(function() {
         writeNext(id);
-      }, 10000);
+      }, 6000);
     }
     
     
@@ -250,7 +282,7 @@ block content
                   fill: false,
                   lineTension: 0,
                   borderColor: myColors[x],
-                  borderWidth: 1
+                  borderWidth: 1.5
                 }
                 bwdatasets.push(dataset);
               }
@@ -459,10 +491,14 @@ block content
       label(for='agente') Selecciona el agente SNMP
       select#agentes.selectpicker(name='agente')
       input(type='submit', value='Actualizar')
+  hr(style="border: 1px solid rgba(10,220,50,0.4); border-radius: 1px;")
   #divCanvasMemoria
     canvas#chartMemoria
+  hr
   #divCanvasCPU
     canvas#chartCPU
+  hr
   #divCanvasDisco
+  hr
   #divCanvasAnnchoBanda
     canvas#chartAnchoBanda
