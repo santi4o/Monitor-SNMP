@@ -4,6 +4,7 @@ block content
     var chartMemoria;
     var chartCPU;
     var chartDisco;
+    var chartAnchoBanda;
     var hasDiskChart = false;
     
     function addData(chart, label, data) {
@@ -138,7 +139,7 @@ block content
       addData();
       setTimeout(function() {
         writeNext(id);
-      }, 5000);
+      }, 10000);
     }
     
     
@@ -165,7 +166,7 @@ block content
           var memvalues = [];
           var cpuvalues = [];
           var diskvalues = [];
-          var bwvalues = [];
+          //var bwvalues = [];
           
           var bwChartDesc;
           
@@ -206,7 +207,8 @@ block content
                 console.log(attrName);
                 var attrValue = obj[key];
                 console.log(attrValue);
-              } else if (key == "anchoBanda") {
+              } 
+              /*else if (key == "anchoBanda") {
                 //console.log("working 1");
                 var values = [];
                 for (var x = 0; x < obj[key].length; x++) {
@@ -214,11 +216,56 @@ block content
                   values.push(obj[key][x]);
                 }
                 bwvalues.push(values);
-              }
+              }*/
             }
             
             //console.log("El agente tiene " + obj["anchoBanda"].length + " interfaces");
           }
+          
+          
+          //prepara los datasets para el chart de ancho de banda
+          /*var dataset = {
+            label: response[0].anchoBanda[x].ifDescr,
+            data: rdiskvalues,
+            backgroundColor: 'rgba(100, 130, 200, 0.9)',
+            lineTension: 0,
+            borderColor:
+                'rgba(120, 230, 180, 100)',
+            borderWidth: 1
+          }*/
+          var myColors = [
+            'rgba(0, 0, 255, 1)',
+            'rgba(0, 255, 0, 1)',
+            'rgba(0, 255, 255, 1)',
+            'rgba(255, 0, 0, 1)',
+            'rgba(255, 0, 255, 1)',
+          ];
+          var bwdatasets = [];
+          for (var i = 0; i < response.length; i++) {
+            if (i == 0) {
+              for (var x = 0; x < response[i].anchoBanda.length; x++) {
+                var dataset = {
+                  label: response[i].anchoBanda[x].ifDescr,
+                  data: [],
+                  fill: false,
+                  lineTension: 0,
+                  borderColor: myColors[x],
+                  borderWidth: 1
+                }
+                bwdatasets.push(dataset);
+              }
+            }
+            for (var n = 0; n < response[i].anchoBanda.length; n++) {
+              for (var j = 0; j < bwdatasets.length; j++) {
+                if (bwdatasets[j].label == response[i].anchoBanda[n].ifDescr) {
+                  console.log('!');
+                  bwdatasets[j].data.push(response[i].anchoBanda[n].utilizacion);
+                  break;
+                }
+              }
+            }
+          }
+          //console.log(bwdatasets);
           
           
           //rellena con 0 los lugares sin datos
@@ -235,14 +282,14 @@ block content
               }
             }
           }
-          
-          for (var i = 0; i < bwvalues.length; i++) {
+          for (var i = 0; i < bwdatasets.length; i++) {
             for (var x = 0; x < 10; x++) {
-              if (x >= bwvalues.length) {
-                bwvalues[i][x] = 0;
+              if (x >= bwdatasets[i].data.length) {
+                bwdatasets[i].data.push(0);
               }
             }
           }
+          //console.log(bwdatasets);
           
           
           //Cambia el orden de los elementos en los datos de las graficas
@@ -251,7 +298,10 @@ block content
           if (hasDiskChart) {
             rdiskvalues = diskvalues.reverse();
           }
-          
+          for (var i = 0; i < bwdatasets.length; i++) {
+            bwdatasets[i].data = bwdatasets[i].data.reverse();
+          }
+          //console.log(bwdatasets);
           //console.log(response);
           //console.log(rmemvalues);
           
@@ -363,6 +413,33 @@ block content
           
           
           
+          //configuración del chart ancho de banda
+          var ctx = document.getElementById('chartAnchoBanda').getContext('2d');
+          ctx.height = 45;
+          chartAnchoBanda = new Chart(ctx, {
+              type: 'line',
+              data: {
+                  labels: [1,2,3,4,5,6,7,8,9,10],
+                  datasets: bwdatasets
+              },
+              options: {
+                  maintainAspectRatio: false,
+                  responsive : true,
+                  scales: {
+                    yAxes: [{
+                      ticks: {
+                        beginAtZero: true
+                      }
+                    }]
+                  },
+                  animation: {
+                    easing:'linear',
+                    duration: 40
+                  }
+              }
+          });
+          
+          
           //inicia la función recursiva que carga nuevos valores cada cierto tiempo
           if (idAgente !=  $( "#agentes" ).val()) {
             idAgente = $( "#agentes" ).val();
@@ -377,17 +454,15 @@ block content
         });
       });
     });
-  br
-  br
-  br
   #div1
     form#form1(method='POST', action='/resourcesUtil')
       label(for='agente') Selecciona el agente SNMP
       select#agentes.selectpicker(name='agente')
-      input(type='submit', value='Ver')
+      input(type='submit', value='Actualizar')
   #divCanvasMemoria
     canvas#chartMemoria
   #divCanvasCPU
     canvas#chartCPU
   #divCanvasDisco
   #divCanvasAnnchoBanda
+    canvas#chartAnchoBanda
