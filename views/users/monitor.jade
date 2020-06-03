@@ -1,41 +1,148 @@
 extends ../Layout_Users.jade
 block content
   script.
-    var myChart;
-    var stop = true;
+    var chartMemoria;
+    var chartCPU;
+    var chartDisco;
+    var hasDiskChart = false;
+    
     function addData(chart, label, data) {
-      var chart = myChart;
-      var label = "nuevo";
-      var data = Math.random()*100;
-      
-      for (i = 0; i < chart.data.labels.length-1; i++) {
-        chart.data.labels[i] = chart.data.labels[i+1];
-      }
-      chart.data.labels[chart.data.labels.length-1] = label;
-      //chart.data.labels.push(label);
-      chart.data.datasets.forEach((dataset) => {
-        for (i = 0; i < dataset.data.length-1; i++) {
-          dataset.data[i] = dataset.data[i+1];
+      //Obtiene nueva información de los recursos del agente
+      $.ajax({
+        url: "/newResourcesUtil",
+        method: 'POST',
+        data: $('#form1').serialize()
+      })
+      .done(function (response) {
+        //actualiza información en chartMemoria
+        var chart = chartMemoria;
+        var label = "nuevo";
+        var memoria = response[0]["memoria"];
+        console.log("memoria: " + memoria);
+        for (i = 0; i < chart.data.labels.length-1; i++) {
+          chart.data.labels[i] = chart.data.labels[i+1];
         }
-        dataset.data[dataset.data.length] = data;
-        //dataset.data.push(data);
-      });
-      chart.update();
+        chart.data.labels[chart.data.labels.length-1] = label;
+        var newData = [];
+        //console.log("data.length = " + chart.data.datasets[0].data.length);
+        for (i = 0; i < chart.data.datasets[0].data.length-1; i++) {
+          //chart.data.datasets[0].data[i] = chart.data.datasets[0].data[i+1];
+          newData.push(chart.data.datasets[0].data[i+1]);
+        }
+        newData.push(memoria);
+        chart.data.datasets[0].data = newData;
+        chart.update();
+        
+        
+        //actualiza información en chartCPU
+        chart = chartCPU;
+        label = "nuevoCPU";
+        cpuLoad = response[0]["cpu"];
+        console.log("carga del cpu: " + cpuLoad);
+        
+        for (i = 0; i < chart.data.labels.length-1; i++) {
+          chart.data.labels[i] = chart.data.labels[i+1];
+        }
+        chart.data.labels[chart.data.labels.length-1] = label;
+        //chart.data.labels.push(label);
+        
+        var newData = [];
+        //console.log("data.length = " + chart.data.datasets[0].data.length);
+        for (i = 0; i < chart.data.datasets[0].data.length-1; i++) {
+          //chart.data.datasets[0].data[i] = chart.data.datasets[0].data[i+1];
+          newData.push(chart.data.datasets[0].data[i+1]);
+        }
+        newData.push(cpuLoad);
+        chart.data.datasets[0].data = newData;
+        chart.update();
+        
+        if (!hasDiskChart) {
+          if (response[0].hasOwnProperty('disco')) {
+            hasDiskChart = true;
+            $("#divCanvasDisco").append("<canvas id='chartDisco'></canvas>");
+              var ctx = document.getElementById('chartDisco').getContext('2d');
+              ctx.height = 45;
+              chartDisco = new Chart(ctx, {
+                  type: 'line',
+                  data: {
+                      labels: ['?','?','?','?','?','?','?','?','?','?'],
+                      datasets: [{
+                          label: '% de uso del almacenamiento masivo',
+                          data: [0,0,0,0,0,0,0,0,0,0],
+                          backgroundColor: 'rgba(100, 130, 200, 0.9)',
+                          lineTension: 0,
+                          borderColor:
+                              'rgba(120, 230, 180, 100)',
+                          borderWidth: 1
+                      }]
+                  },
+                  options: {
+                      maintainAspectRatio: false,
+                      responsive : true,
+                      scales: {
+                        yAxes: [{
+                          ticks: {
+                            beginAtZero: true
+                          }
+                        }]
+                      },
+                      animation: {
+                        easing:'linear',
+                        duration: 40
+                      }
+                  }
+              });
+          }
+        }
+        
+        if (hasDiskChart) {
+          //actualiza información en chartCPU
+          chart = chartDisco;
+          label = "nuevoDisco";
+          diskUsage = response[0]["disco"];
+          console.log("uso del disco: " + diskUsage);
+          
+          for (i = 0; i < chart.data.labels.length-1; i++) {
+            chart.data.labels[i] = chart.data.labels[i+1];
+          }
+          chart.data.labels[chart.data.labels.length-1] = label;
+          //chart.data.labels.push(label);
+          
+          var newData = [];
+          //console.log("data.length = " + chart.data.datasets[0].data.length);
+          for (i = 0; i < chart.data.datasets[0].data.length-1; i++) {
+            //chart.data.datasets[0].data[i] = chart.data.datasets[0].data[i+1];
+            newData.push(chart.data.datasets[0].data[i+1]);
+          }
+          newData.push(diskUsage);
+          chart.data.datasets[0].data = newData;
+          chart.update();
+        }
+        
+      })
+      .fail(function(error){
+        console.log('failed: ', arguments);
+        if(error.responseText == 'showAlert'){
+          alert("No se pudo establecer comunicación con el agente");
+          window.location.href = "/monitor";
+        }
+      });    
     }
     var idAgente = "x.x.x.x";
-    function writeNext(id) {
+    
+    //funcion que solicita nueva información de los recursos cada cierto tiempo
+    function writeNext(id) { 
       if (id != idAgente) {
         return;
       }
       addData();
       setTimeout(function() {
         writeNext(id);
-      }, 2000);
+      }, 5000);
     }
     
-    $(document).ready(function(){
-      
-
+    
+    $(document).ready(function() {
       $.getJSON('/agentes', { get_param: 'value' }, function(json) {
         $.each(json, function (index, item) {
           var eachrow = "<option value='" 
@@ -45,29 +152,7 @@ block content
         });
       });
       
-      //var myChart;
-      
-      
-      
-      
-
-      /*function removeData(chart) {
-        
-        chart.data.labels.pop();
-        chart.data.datasets.forEach((dataset) => {
-          dataset.data.pop();
-        });
-        chart.update();
-      }*/
-      
-      
-      
       $('#form1').on('submit', function (e) {
-        getNuevo = null;
-        //clear content from canvas div
-        //$('#divCanvas').html('');
-        //$('#divCanvas').html("<canvas id='myChart' width='400' height='400'></canvas>")
-      // keep the form from submitting synchronously
         e.preventDefault();        
       //petición post del formulario 1, post, '/nuevo_agente'
         $.ajax({
@@ -76,9 +161,32 @@ block content
           data: $('#form1').serialize()
         })
         .done(function (response) {
+          
           var memvalues = [];
+          var cpuvalues = [];
+          var diskvalues = [];
+          var bwvalues = [];
+          
+          var bwChartDesc;
+          
+          $("#divCanvasDisco").html("");
           for (var i = 0; i < response.length; i++) {
+            
             var obj = response[i];
+            
+            //revisa si la información del uso de recursos contien "disco"
+            if (i == 0) {
+              if (obj.hasOwnProperty('disco')) {
+                console.log("Parece ser un sistema Linux");
+                $("#divCanvasDisco").append("<canvas id='chartDisco'></canvas>");
+                hasDiskChart = true;
+              } else {
+                console.log("Parece ser un sistema Cisco");
+                hasDiskChart = false;
+              }
+            }
+            
+            
             for (var key in obj) {
               if (key == "memoria") {
                 memvalues.push(obj[key]);
@@ -86,30 +194,78 @@ block content
                 console.log(attrName);
                 var attrValue = obj[key];
                 console.log(attrValue);
+              } else if (key == "cpu") {
+                cpuvalues.push(obj[key]);
+                var attrName = key;
+                console.log(attrName);
+                var attrValue = obj[key];
+                console.log(attrValue);
+              } else if (key == "disco") {
+                diskvalues.push(obj[key]);
+                var attrName = key;
+                console.log(attrName);
+                var attrValue = obj[key];
+                console.log(attrValue);
+              } else if (key == "anchoBanda") {
+                //console.log("working 1");
+                var values = [];
+                for (var x = 0; x < obj[key].length; x++) {
+                  //console.log("working 2")
+                  values.push(obj[key][x]);
+                }
+                bwvalues.push(values);
               }
             }
+            
+            //console.log("El agente tiene " + obj["anchoBanda"].length + " interfaces");
           }
           
+          
+          //rellena con 0 los lugares sin datos
           for (i = 0; i < 10; i++) {
             if (i >= memvalues.length) {
               memvalues.push(0);
             }
+            if (i >= cpuvalues.length) {
+              cpuvalues.push(0);
+            }
+            if (hasDiskChart) {
+              if (i >= diskvalues.length) {
+                diskvalues.push(0);
+              }
+            }
           }
           
-          rmemvalues = memvalues.reverse();
+          for (var i = 0; i < bwvalues.length; i++) {
+            for (var x = 0; x < 10; x++) {
+              if (x >= bwvalues.length) {
+                bwvalues[i][x] = 0;
+              }
+            }
+          }
           
-          console.log(response);
-
-          var ctx = document.getElementById('myChart').getContext('2d');
-          ctx.height = 40;
-          myChart = new Chart(ctx, {
+          
+          //Cambia el orden de los elementos en los datos de las graficas
+          rmemvalues = memvalues.reverse();
+          rcpuvalues = cpuvalues.reverse();
+          if (hasDiskChart) {
+            rdiskvalues = diskvalues.reverse();
+          }
+          
+          //console.log(response);
+          //console.log(rmemvalues);
+          
+          //configuración del chart memoria
+          var ctx = document.getElementById('chartMemoria').getContext('2d');
+          ctx.height = 45;
+          chartMemoria = new Chart(ctx, {
               type: 'line',
               data: {
                   labels: [1,2,3,4,5,6,7,8,9,10],
                   datasets: [{
-                      label: '# of Votes',
+                      label: '% Memoria Usada en el dispositivo',
                       data: rmemvalues,
-                      backgroundColor: 'rgba(80, 140, 132, 0.5)',
+                      backgroundColor: 'rgba(80, 140, 132, 0.9)',
                       lineTension: 0.1,
                       borderColor:
                           'rgba(255, 99, 132, 1)',
@@ -128,23 +284,97 @@ block content
                   },
                   animation: {
                     easing:'linear',
-                    duration: 30
+                    duration: 40
                   }
               }
           });
-          if (response.length > 0) {
-            if (idAgente != response[0]["agente"]) {
-              idAgente = response[0]["agente"];
-              writeNext(response[0]["agente"]);
-            }
+          
+          
+          //configuración del chart CPU
+          var ctx = document.getElementById('chartCPU').getContext('2d');
+          ctx.height = 45;
+          chartCPU = new Chart(ctx, {
+              type: 'line',
+              data: {
+                  labels: [1,2,3,4,5,6,7,8,9,10],
+                  datasets: [{
+                      label: 'Carga del CPU',
+                      data: rcpuvalues,
+                      backgroundColor: 'rgba(80, 70, 100, 0.9)',
+                      lineTension: 0.2,
+                      borderColor:
+                          'rgba(255, 99, 132, 100)',
+                      borderWidth: 1
+                  }]
+              },
+              options: {
+                  maintainAspectRatio: false,
+                  responsive : true,
+                  scales: {
+                    yAxes: [{
+                      ticks: {
+                        beginAtZero: true
+                      }
+                    }]
+                  },
+                  animation: {
+                    easing:'linear',
+                    duration: 40
+                  }
+              }
+          });
+          
+          
+          //configuración del chart Disco
+          if (hasDiskChart) {
+            var ctx = document.getElementById('chartDisco').getContext('2d');
+            ctx.height = 45;
+            chartDisco = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [1,2,3,4,5,6,7,8,9,10],
+                    datasets: [{
+                        label: '% de uso del almacenamiento masivo',
+                        data: rdiskvalues,
+                        backgroundColor: 'rgba(100, 130, 200, 0.9)',
+                        lineTension: 0,
+                        borderColor:
+                            'rgba(120, 230, 180, 100)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive : true,
+                    scales: {
+                      yAxes: [{
+                        ticks: {
+                          beginAtZero: true
+                        }
+                      }]
+                    },
+                    animation: {
+                      easing:'linear',
+                      duration: 40
+                    }
+                }
+            });
+          }
+          
+          
+          
+          //inicia la función recursiva que carga nuevos valores cada cierto tiempo
+          if (idAgente !=  $( "#agentes" ).val()) {
+            idAgente = $( "#agentes" ).val();
+            writeNext($( "#agentes" ).val());
           }
         })
-        .fail(function(error){
+        .fail(function(error) {
           console.log('failed: ', arguments);
           if(error.responseText == 'showAlert'){
             alert("No se pudo establecer comunicación con el servidor");
           }
-        })
+        });
       });
     });
   br
@@ -152,8 +382,12 @@ block content
   br
   #div1
     form#form1(method='POST', action='/resourcesUtil')
-      label(for='cars') Selecciona el agente SNMP
+      label(for='agente') Selecciona el agente SNMP
       select#agentes.selectpicker(name='agente')
       input(type='submit', value='Ver')
-  #divCanvas
-    canvas#myChart()
+  #divCanvasMemoria
+    canvas#chartMemoria
+  #divCanvasCPU
+    canvas#chartCPU
+  #divCanvasDisco
+  #divCanvasAnnchoBanda

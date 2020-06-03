@@ -144,12 +144,13 @@ app.get("/monitor", function(req,res){ //Metodo GET, la diagonal invertida repre
 app.post("/resourcesUtil", function(req, res) {
   if (String(req.session.user_id) == "undefined") {
       res.redirect("/");
-  } else{
+  } else {
+    console.log(req.body.agente)
     MongoClient.connect(url, function(err, db) {
       if (err) throw err;
       var dbo = db.db("MonitorRed");
       collection = dbo.collection("resourcesUtil");
-      collection.find({"agente":req.body.agente})
+      collection.find({"agente":req.body.agente}) //ip del agente
         .sort({_id:-1})
         .limit(5)
         .toArray((error, result) => {
@@ -160,6 +161,92 @@ app.post("/resourcesUtil", function(req, res) {
         res.json(result);
       });
     });
+  }
+});
+
+//se llama para ejecutar un script de snmp y devolver un nuevo json
+app.post("/newResourcesUtil", function(req, res) {
+
+  if (String(req.session.user_id) == "undefined") {
+      res.redirect("/");
+  } else {
+    console.log(req.body.agente);
+    //obtener ip y comunidad del agente
+    //ip = req.body.agente;
+    comunidad = "";
+
+    MongoClient.connect(url, function(err, db) {
+      if (err) throw err;
+      var dbo = db.db("MonitorRed");
+      collection = dbo.collection("AgentesSNMP");
+      collection.find({"ip":req.body.agente})
+        .limit(1)
+        .toArray((error, result) => {
+        if(error) {
+            console.log("there was an error in find()");
+            return response.status(500).send(error);
+        }
+        console.log("se encontró la comunidad del agente: " + result[0].comunidad);
+        comunidad = result[0].comunidad;
+        descripcion = result[0].descripcion;
+        primeraPalabra = descripcion.substr(0, descripcion.indexOf(" "));
+        script = "";
+        if (primeraPalabra == "Linux") {
+          script = "snmp/snmpResUsageUbuntu.py";
+        } else if (primeraPalabra = "Cisco") {
+          script = "snmp/snmpResUsageCisco.py";
+        } else {
+          console.log("Tipo de sistema desconocido");
+          res.status(500).send('showAlert');
+        }
+
+        console.log("ip = " + req.body.agente);
+        console.log("comunidad = " + comunidad);
+        //ejecutar script snmp
+
+        const python = spawn('python', [script,
+                                        req.body.agente,
+                                        comunidad]);
+
+        python.stdout.on('data', function (data) {
+          console.log('Pipe data from python script ...');
+          console.log(data.toString())
+          dataToSend = data.toString();
+        });
+        // in close event we are sure that stream from child process is closed
+        python.on('close', (code) => {
+          console.log(`child process close all stdio with code ${code}`);
+          if (code === 0) {
+
+
+            MongoClient.connect(url, function(err, db) {
+              if (err) throw err;
+              var dbo = db.db("MonitorRed");
+              collection = dbo.collection("resourcesUtil");
+              collection.find({"agente":req.body.agente})
+                .sort({_id:-1})
+                .limit(1)
+                .toArray((error, result) => {
+                if(error) {
+                    return response.status(500).send(error);
+                }
+                console.log("enviando resourcesUtil (last) del agente");
+                res.json(result);
+              });
+            });
+          } else {
+            console.log("somethig went wrong with the python script");
+            res.status(500).send('showAlert');
+          }
+          //res.render("mostrar_agentes")
+          //res.status(500).send('showAlert');
+
+        });
+
+      });
+    });
+
+
   }
 });
 

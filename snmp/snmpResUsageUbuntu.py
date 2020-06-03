@@ -12,7 +12,7 @@ client = MongoClient('localhost', 27017)
 db = client.MonitorRed
 
 if len(sys.argv) < 3:
-	print("\tUso:\n\tpython anchoBanda.py <IP> <COMUNIDAD>")
+	print("\tUso:\n\tpython snmpResUsageUbuntu.py <IP> <COMUNIDAD>")
 	sys.exit()
 
 def getCPUMemUsage(ip, comunidad):

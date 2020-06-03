@@ -1,17 +1,17 @@
 {
-  "agente" : "192.168.100.10",
-  "tiempo" :  1590911603.13 ,
+  "agente" : "192.168.0.2",
+  "tiempo" :  1591131824.33 ,
   "interfacesInfo" : [
     {
       "ifDescr" : "lo",
-      "ifInOctets" :  1157885.0 ,
-      "ifOutOctets" :  1157885.0
+      "ifInOctets" :  612259.0 ,
+      "ifOutOctets" :  612259.0
     }
     ,
     {
-      "ifDescr" : "Qualcomm Atheros AR8132 Fast Ethernet",
-      "ifInOctets" :  832979495.0 ,
-      "ifOutOctets" :  27144021.0
+      "ifDescr" : "Intel Corporation 82545EM Gigabit Ethernet Controller (Copper)",
+      "ifInOctets" :  1258.0 ,
+      "ifOutOctets" :  16559.0
     }
   ]
 }
