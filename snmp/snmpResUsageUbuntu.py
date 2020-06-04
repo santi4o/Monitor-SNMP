@@ -5,6 +5,7 @@ import pymongo
 from pymongo import *
 from pprint import pprint
 import json
+import datetime
 #from json import JSONEncoder
 
 
@@ -159,7 +160,7 @@ print('Inserted document as {0}'.format(result.inserted_id))
 print (util)
 
 cpu_mem = getCPUMemUsage(sys.argv[1], sys.argv[2])
-
+currentDT = datetime.datetime.now()
 libre = float(cpu_mem[2][1])
 total = float(cpu_mem[3][1])
 memUtil = ((total-libre) / total) * 100
@@ -188,7 +189,8 @@ else:
 		print '    }'
 		if (x != len(util)-1):
 			print "    ,"
-print "  ]"
+print "  ],"
+print '  "date": "{}"'.format(currentDT)
 print "}"
 
 sys.stdout = console

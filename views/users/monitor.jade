@@ -7,6 +7,15 @@ block content
     var chartAnchoBanda;
     var hasDiskChart = false;
     
+    
+    var myColors = [
+      'rgba(0, 0, 255, 1)',
+      'rgba(0, 255, 0, 1)',
+      'rgba(0, 255, 255, 1)',
+      'rgba(255, 0, 0, 1)',
+      'rgba(255, 0, 255, 1)',
+    ];
+    
     function addData(chart, label, data) {
       //Obtiene nueva información de los recursos del agente
       $.ajax({
@@ -124,6 +133,25 @@ block content
         //Actualiza la información en chart anchoBanda
         chart = chartAnchoBanda;
         label = "nuevoBW";
+        
+        
+        
+        if (chart.data.datasets.length == 0) {
+          for (var x = 0; x < response[0].anchoBanda.length; x++) {
+            var dataset = {
+              label: response[0].anchoBanda[x].ifDescr,
+              data: [0,0,0,0,0,0,0,0,0,0],
+              fill: false,
+              lineTension: 0,
+              borderColor: myColors[x],
+              borderWidth: 1.5
+            }
+            chart.data.datasets.push(dataset);
+          }
+        }
+
+        
+        
         
         for (var i = 0; i < chart.data.labels.length-1; i++) {
           chart.data.labels[i] = chart.data.labels[i+1];
@@ -265,13 +293,7 @@ block content
                 'rgba(120, 230, 180, 100)',
             borderWidth: 1
           }*/
-          var myColors = [
-            'rgba(0, 0, 255, 1)',
-            'rgba(0, 255, 0, 1)',
-            'rgba(0, 255, 255, 1)',
-            'rgba(255, 0, 0, 1)',
-            'rgba(255, 0, 255, 1)',
-          ];
+          
           var bwdatasets = [];
           for (var i = 0; i < response.length; i++) {
             if (i == 0) {
