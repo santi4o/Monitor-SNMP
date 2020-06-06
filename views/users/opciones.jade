@@ -1,0 +1,13 @@
+extends ../Layout_Users.jade
+block content
+  h2 Configuración de alertas
+  form(method="POST", action="/nuevo_agente", id="form1")
+      center
+          div(class="form-group")
+              label(for="ip_agente") IPv4: 
+              input(type="text", name="agente[ip]", id="ip_agente1", placeholder="X.X.X.X",class="form-control texto")
+          div(class="form-group") 
+              label(for="community") Comunidad: 
+              input(type="text", name="agente[community]", id="community1", placeholder="Comunidad",class="form-control texto")
+          div
+              input(type="submit", value="Verificar Conexión", class="btn btn-success", id="submit1")

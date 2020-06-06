@@ -94,7 +94,7 @@ app.get("/nuevo_agente", function(req,res){ //Metodo GET, la diagonal invertida 
 });
 
 
-app.get("/agentes", function(req,res){ //Metodo GET, la diagonal invertida representa la página principal
+app.get("/agentes", function(req, res) { //Metodo GET, la diagonal invertida representa la página principal
     if (String(req.session.user_id) == "undefined") {
         res.redirect("/");
     } else{
@@ -112,10 +112,10 @@ app.get("/agentes", function(req,res){ //Metodo GET, la diagonal invertida repre
     }
 });
 
-app.get("/admin_agentes", function(req,res){ //Metodo GET, la diagonal invertida representa la página principal
+app.get("/admin_agentes", function(req, res) { //Metodo GET, la diagonal invertida representa la página principal
     if (String(req.session.user_id) == "undefined") {
         res.redirect("/");
-    } else{
+    } else {
       MongoClient.connect(url, function(err, db) {
         if (err) throw err;
         var dbo = db.db("MonitorRed");
@@ -155,6 +155,15 @@ app.get("/monitor", function(req,res){ //Metodo GET, la diagonal invertida repre
           }
         });
       });
+    }
+});
+
+
+app.get("/opciones_alertas", function(req, res) { //Metodo GET, la diagonal invertida representa la página principal
+    if (String(req.session.user_id) == "undefined") {
+        res.redirect("/");
+    } else {
+        res.render("users/opciones");
     }
 });
 
