@@ -1,17 +1,29 @@
 {
-  "agente" : "192.168.0.2",
-  "tiempo" :  1591246239.35 ,
+  "agente" : "192.168.1.5",
+  "tiempo" :  1591413613.38 ,
   "interfacesInfo" : [
     {
-      "ifDescr" : "lo",
-      "ifInOctets" :  826003.0 ,
-      "ifOutOctets" :  826003.0
+      "ifDescr" : "GigabitEthernet0/0",
+      "ifInOctets" :  2680811.0 ,
+      "ifOutOctets" :  353552.0
     }
     ,
     {
-      "ifDescr" : "Intel Corporation 82545EM Gigabit Ethernet Controller (Copper)",
-      "ifInOctets" :  45193.0 ,
-      "ifOutOctets" :  65126.0
+      "ifDescr" : "GigabitEthernet0/1",
+      "ifInOctets" :  417079.0 ,
+      "ifOutOctets" :  602718.0
+    }
+    ,
+    {
+      "ifDescr" : "GigabitEthernet0/2",
+      "ifInOctets" :  446115.0 ,
+      "ifOutOctets" :  2682271.0
+    }
+    ,
+    {
+      "ifDescr" : "GigabitEthernet0/3",
+      "ifInOctets" :  0.0 ,
+      "ifOutOctets" :  0.0
     }
   ]
 }

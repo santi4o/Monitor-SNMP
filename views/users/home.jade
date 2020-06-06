@@ -1,7 +1,23 @@
 extends ../Layout_Users.jade
 block content
-
+    script.
+        //$(document).ready(function() {
+          function myFunction() { 
+              $.ajax({
+                url: "/sendmail",
+                method: 'POST',
+                data: {}
+              })
+              .done(function (response) {
+                console.log("done");
+                //window.location.href = "/admin_agentes";
+              })
+              .fail(function (response) {
+                console.log("Hubo un error");
+              });
+          }
+        //});
     center
         h2 Bienvenido(a) #{user.Nombre}
         img(src="/images/User.png" class="Node")
-        
+        button(onclick='myFunction()') Click me

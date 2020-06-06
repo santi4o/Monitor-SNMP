@@ -4,7 +4,7 @@ block content
     function nuevo() {
       window.location.href = "/nuevo_agente";
     }
-    $(document).ready(function(){
+    $(document).ready(function() {
       $("#customers").on("click", "button", function(e) {
         var row = $(this).closest("tr");
         var ip = row.find("td").eq(1).text();

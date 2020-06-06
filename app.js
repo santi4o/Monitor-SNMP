@@ -4,6 +4,7 @@ var bodyParser = require("body-parser"); //Importamos la libreria Body Parser pa
 var session = require("express-session"); //Librería que nos permite el uso de sesiones
 var router_users = require("./routes"); //Rutas de un usuario logeado
 var validation_middleware = require("./middlewares/session"); //Middleware que valida
+var nodemailer = require('nodemailer');
 const {spawn} = require('child_process'); //libreria necesaria para ejecutar scripts en python
 
 /*-----------------------Datos de MongoDB----------------------------*/
@@ -26,6 +27,23 @@ var url = "mongodb://localhost:27017/";
 
 //var jsonagente = require('./agentinfo.json')
 var fs = require('fs');
+
+//-------------------------------nodemailer--------------------------------
+//process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+var user_email;
+var transporter = nodemailer.createTransport({
+  host: "correo.equipo1.com",
+  port: 25,
+  secure: false, // true for 465, false for other ports
+  auth: {
+    user: 'monitor@equipo1.com', // generated ethereal user
+    pass: '330.87m16monitor', // generated ethereal password
+  },
+  tls: {
+    rejectUnauthorized: false
+  }
+});
+
 
 
 /*----------------------Métodos del servidor----------------------------*/
@@ -128,7 +146,7 @@ app.get("/monitor", function(req,res){ //Metodo GET, la diagonal invertida repre
         collection = dbo.collection("AgentesSNMP");
         collection.find({}).toArray((error, result) => {
           if (error) {
-              return response.status(500).send(error);
+              return res.status(500).send(error);
           }
           if (result.length === 0) {
             res.render('users/sin_agentes');
@@ -139,6 +157,30 @@ app.get("/monitor", function(req,res){ //Metodo GET, la diagonal invertida repre
       });
     }
 });
+
+app.post("/sendmail", function(req, res) {
+  if (String(req.session.user_id) == "undefined") {
+      res.redirect("/");
+  } else {
+    console.log("email: " + user_email + " ?");
+    var mailOptions = {
+      from: 'monitor@equipo1.com',
+      to: user_email,
+      subject: 'Sending Email using Node.js',
+      text: 'That was easy!'
+    };
+    transporter.sendMail(mailOptions, function(error, info) {
+      if (error) {
+        console.log(error);
+        res.status(500).send(error);
+      } else {
+        console.log('Email sent: ' + info.response);
+        res.end("OK");
+      }
+    });
+  }
+});
+
 
 
 app.post("/resourcesUtil", function(req, res) {
@@ -152,7 +194,7 @@ app.post("/resourcesUtil", function(req, res) {
       collection = dbo.collection("resourcesUtil");
       collection.find({"agente":req.body.agente}) //ip del agente
         .sort({_id:-1})
-        .limit(5)
+        .limit(10)
         .toArray((error, result) => {
         if(error) {
             return response.status(500).send(error);
@@ -184,7 +226,7 @@ app.post("/newResourcesUtil", function(req, res) {
         .toArray((error, result) => {
         if(error) {
             console.log("there was an error in find()");
-            return response.status(500).send(error);
+            return res.status(500).send(error);
         }
         console.log("se encontró la comunidad del agente: " + result[0].comunidad);
         comunidad = result[0].comunidad;
@@ -378,6 +420,7 @@ app.post("/sign", function(req,res){  //Metodo Para desplegar la base
             res.redirect("/wrong_login");
 
         } else{
+            user_email = req.body.Email;
             console.log("Ingreso al sistema el usuario: " + doc[0].Email);
             console.log("Creando sesión");
             req.session.user_id = doc[0]._id;

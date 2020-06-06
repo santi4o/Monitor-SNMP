@@ -6,13 +6,13 @@ block content
     var chartDisco;
     var chartAnchoBanda;
     var hasDiskChart = false;
-    
+    var chartHeight = "200px";
     
     var myColors = [
       'rgba(0, 0, 255, 1)',
       'rgba(0, 255, 0, 1)',
-      'rgba(0, 255, 255, 1)',
       'rgba(255, 0, 0, 1)',
+      'rgba(0, 255, 255, 1)',
       'rgba(255, 0, 255, 1)',
     ];
     
@@ -26,16 +26,20 @@ block content
       .done(function (response) {
         //actualiza información en chartMemoria
         var chart = chartMemoria;
-        var label = "nuevo";
+        var label = response[0]["date"].split(".")[0];
         var memoria = response[0]["memoria"];
         console.log("memoria: " + memoria);
-        for (i = 0; i < chart.data.labels.length-1; i++) {
-          chart.data.labels[i] = chart.data.labels[i+1];
+        var newLabels = [];
+        for (var i = 0; i < chart.data.labels.length-1; i++) {
+          //chart.data.labels[i] = chart.data.labels[i+1];
+          newLabels.push(chart.data.labels[i+1]);
         }
-        chart.data.labels[chart.data.labels.length-1] = label;
+        newLabels.push(label);
+        chart.data.labels = newLabels;
+        //chart.data.labels[chart.data.labels.length-1] = label;
         var newData = [];
         //console.log("data.length = " + chart.data.datasets[0].data.length);
-        for (i = 0; i < chart.data.datasets[0].data.length-1; i++) {
+        for (var i = 0; i < chart.data.datasets[0].data.length-1; i++) {
           //chart.data.datasets[0].data[i] = chart.data.datasets[0].data[i+1];
           newData.push(chart.data.datasets[0].data[i+1]);
         }
@@ -46,19 +50,26 @@ block content
         
         //actualiza información en chartCPU
         chart = chartCPU;
-        label = "nuevoCPU";
+        //label = "nuevoCPU";
         cpuLoad = response[0]["cpu"];
         console.log("carga del cpu: " + cpuLoad);
         
-        for (i = 0; i < chart.data.labels.length-1; i++) {
+        var newLabels = [];
+        for (var i = 0; i < chart.data.labels.length-1; i++) {
+          //chart.data.labels[i] = chart.data.labels[i+1];
+          newLabels.push(chart.data.labels[i+1]);
+        }
+        newLabels.push(label);
+        chart.data.labels = newLabels;
+        /*for (var i = 0; i < chart.data.labels.length-1; i++) {
           chart.data.labels[i] = chart.data.labels[i+1];
         }
-        chart.data.labels[chart.data.labels.length-1] = label;
+        chart.data.labels[chart.data.labels.length-1] = label;*/
         //chart.data.labels.push(label);
         
         var newData = [];
         //console.log("data.length = " + chart.data.datasets[0].data.length);
-        for (i = 0; i < chart.data.datasets[0].data.length-1; i++) {
+        for (var i = 0; i < chart.data.datasets[0].data.length-1; i++) {
           //chart.data.datasets[0].data[i] = chart.data.datasets[0].data[i+1];
           newData.push(chart.data.datasets[0].data[i+1]);
         }
@@ -66,12 +77,14 @@ block content
         chart.data.datasets[0].data = newData;
         chart.update();
         
+        
+        //actualizacion en chart disco
         if (!hasDiskChart) {
           if (response[0].hasOwnProperty('disco')) {
             hasDiskChart = true;
             $("#divCanvasDisco").append("<canvas id='chartDisco'></canvas>");
               var ctx = document.getElementById('chartDisco').getContext('2d');
-              ctx.height = 45;
+              ctx.height = chartHeight;
               chartDisco = new Chart(ctx, {
                   type: 'line',
                   data: {
@@ -79,7 +92,7 @@ block content
                       datasets: [{
                           label: '% de uso del almacenamiento masivo',
                           data: [0,0,0,0,0,0,0,0,0,0],
-                          backgroundColor: 'rgba(100, 130, 200, 0.9)',
+                          backgroundColor:  'rgba(240, 5, 240, 0.4)',
                           lineTension: 0,
                           borderColor:
                               'rgba(120, 230, 180, 100)',
@@ -108,14 +121,21 @@ block content
         if (hasDiskChart) {
           //actualiza información en chartCPU
           chart = chartDisco;
-          label = "nuevoDisco";
+          //label = "nuevoDisco";
           diskUsage = response[0]["disco"];
           console.log("uso del disco: " + diskUsage);
           
-          for (i = 0; i < chart.data.labels.length-1; i++) {
+          var newLabels = [];
+          for (var i = 0; i < chart.data.labels.length-1; i++) {
+            //chart.data.labels[i] = chart.data.labels[i+1];
+            newLabels.push(chart.data.labels[i+1]);
+          }
+          newLabels.push(label);
+          chart.data.labels = newLabels;
+          /*for (i = 0; i < chart.data.labels.length-1; i++) {
             chart.data.labels[i] = chart.data.labels[i+1];
           }
-          chart.data.labels[chart.data.labels.length-1] = label;
+          chart.data.labels[chart.data.labels.length-1] = label;*/
           //chart.data.labels.push(label);
           
           var newData = [];
@@ -132,7 +152,7 @@ block content
         
         //Actualiza la información en chart anchoBanda
         chart = chartAnchoBanda;
-        label = "nuevoBW";
+        //label = "nuevoBW";
         
         
         
@@ -151,12 +171,18 @@ block content
         }
 
         
-        
-        
+        var newLabels = [];
         for (var i = 0; i < chart.data.labels.length-1; i++) {
+          //chart.data.labels[i] = chart.data.labels[i+1];
+          newLabels.push(chart.data.labels[i+1]);
+        }
+        newLabels.push(label);
+        chart.data.labels = newLabels;
+        
+        /*for (var i = 0; i < chart.data.labels.length-1; i++) {
           chart.data.labels[i] = chart.data.labels[i+1];
         }
-        chart.data.labels[chart.data.labels.length-1] = label;
+        chart.data.labels[chart.data.labels.length-1] = label;*/
         
         for (var n = 0; n < response[0].anchoBanda.length; n++) {
           for (var j = 0; j < chart.data.datasets.length; j++) {
@@ -226,6 +252,7 @@ block content
           var memvalues = [];
           var cpuvalues = [];
           var diskvalues = [];
+          var dateLabels = [];
           //var bwvalues = [];
           
           var bwChartDesc;
@@ -238,11 +265,11 @@ block content
             //revisa si la información del uso de recursos contien "disco"
             if (i == 0) {
               if (obj.hasOwnProperty('disco')) {
-                console.log("Parece ser un sistema Linux");
+                //console.log("Parece ser un sistema Linux");
                 $("#divCanvasDisco").append("<canvas id='chartDisco'></canvas>");
                 hasDiskChart = true;
               } else {
-                console.log("Parece ser un sistema Cisco");
+                //console.log("Parece ser un sistema Cisco");
                 hasDiskChart = false;
               }
             }
@@ -267,19 +294,14 @@ block content
                 console.log(attrName);
                 var attrValue = obj[key];
                 console.log(attrValue);
+              } else if (key == "date") {
+                dateLabels.push(obj[key].split(".")[0]);
+                var attrName = key;
+                console.log(attrName);
+                var attrValue = obj[key];
+                console.log(attrValue);
               } 
-              /*else if (key == "anchoBanda") {
-                //console.log("working 1");
-                var values = [];
-                for (var x = 0; x < obj[key].length; x++) {
-                  //console.log("working 2")
-                  values.push(obj[key][x]);
-                }
-                bwvalues.push(values);
-              }*/
             }
-            
-            //console.log("El agente tiene " + obj["anchoBanda"].length + " interfaces");
           }
           
           
@@ -330,6 +352,9 @@ block content
             if (i >= cpuvalues.length) {
               cpuvalues.push(0);
             }
+            if (i >= dateLabels.length) {
+              dateLabels.push(0);
+            }
             if (hasDiskChart) {
               if (i >= diskvalues.length) {
                 diskvalues.push(0);
@@ -349,6 +374,7 @@ block content
           //Cambia el orden de los elementos en los datos de las graficas
           rmemvalues = memvalues.reverse();
           rcpuvalues = cpuvalues.reverse();
+          rdateLabels = dateLabels.reverse();
           if (hasDiskChart) {
             rdiskvalues = diskvalues.reverse();
           }
@@ -361,18 +387,17 @@ block content
           
           //configuración del chart memoria
           var ctx = document.getElementById('chartMemoria').getContext('2d');
-          ctx.height = 45;
+          //ctx.height = "400px";
           chartMemoria = new Chart(ctx, {
               type: 'line',
               data: {
-                  labels: [1,2,3,4,5,6,7,8,9,10],
+                  labels: rdateLabels,
                   datasets: [{
                       label: '% Memoria Usada en el dispositivo',
                       data: rmemvalues,
-                      backgroundColor: 'rgba(80, 140, 132, 0.9)',
+                      backgroundColor: 'rgba(5, 10, 240, 0.4)',
                       lineTension: 0.1,
-                      borderColor:
-                          'rgba(255, 99, 132, 1)',
+                      borderColor: 'rgba(0, 0, 255, 1)',
                       borderWidth: 1
                   }]
               },
@@ -392,22 +417,23 @@ block content
                   }
               }
           });
+          chartMemoria.canvas.parentNode.style.height = chartHeight;
           
           
           //configuración del chart CPU
           var ctx = document.getElementById('chartCPU').getContext('2d');
-          ctx.height = 45;
+          //ctx.height = chartHeight;
           chartCPU = new Chart(ctx, {
               type: 'line',
               data: {
-                  labels: [1,2,3,4,5,6,7,8,9,10],
+                  labels: rdateLabels,
                   datasets: [{
                       label: 'Carga del CPU',
                       data: rcpuvalues,
-                      backgroundColor: 'rgba(80, 70, 100, 0.9)',
+                      backgroundColor: 'rgba(10, 240, 5, 0.4)',
                       lineTension: 0.2,
                       borderColor:
-                          'rgba(255, 99, 132, 100)',
+                          'rgba(0, 255, 0, 1)',
                       borderWidth: 1
                   }]
               },
@@ -427,23 +453,23 @@ block content
                   }
               }
           });
-          
+          chartCPU.canvas.parentNode.style.height = chartHeight;
           
           //configuración del chart Disco
           if (hasDiskChart) {
             var ctx = document.getElementById('chartDisco').getContext('2d');
-            ctx.height = 45;
+            //ctx.height = chartHeight;
             chartDisco = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: [1,2,3,4,5,6,7,8,9,10],
+                    labels: rdateLabels,
                     datasets: [{
                         label: '% de uso del almacenamiento masivo',
                         data: rdiskvalues,
-                        backgroundColor: 'rgba(100, 130, 200, 0.9)',
+                        backgroundColor: 'rgba(240, 5, 240, 0.4)',
                         lineTension: 0,
                         borderColor:
-                            'rgba(120, 230, 180, 100)',
+                            'rgba(255, 0, 255, 1)',
                         borderWidth: 1
                     }]
                 },
@@ -463,17 +489,18 @@ block content
                     }
                 }
             });
+            chartDisco.canvas.parentNode.style.height = chartHeight;
           }
           
           
           
           //configuración del chart ancho de banda
           var ctx = document.getElementById('chartAnchoBanda').getContext('2d');
-          ctx.height = 45;
+          //ctx.height = chartHeight;
           chartAnchoBanda = new Chart(ctx, {
               type: 'line',
               data: {
-                  labels: [1,2,3,4,5,6,7,8,9,10],
+                  labels: rdateLabels,
                   datasets: bwdatasets
               },
               options: {
@@ -492,7 +519,7 @@ block content
                   }
               }
           });
-          
+          chartAnchoBanda.canvas.parentNode.style.height = chartHeight;
           
           //inicia la función recursiva que carga nuevos valores cada cierto tiempo
           if (idAgente !=  $( "#agentes" ).val()) {
@@ -520,7 +547,7 @@ block content
   #divCanvasCPU
     canvas#chartCPU
   hr
-  #divCanvasDisco
-  hr
   #divCanvasAnnchoBanda
     canvas#chartAnchoBanda
+  hr
+  #divCanvasDisco
