@@ -225,7 +225,7 @@ block content
       addData();
       setTimeout(function() {
         writeNext(id);
-      }, 31000);
+      }, 20000);
     }
     
     
@@ -256,7 +256,10 @@ block content
           //var bwvalues = [];
           
           var bwChartDesc;
-          
+          if (response.length == 0) {
+            alert("Aún no hay información del monitoreo, intente en unos segundos más");
+            window.location.href = "/monitor";
+          }
           $("#divCanvasDisco").html("");
           for (var i = 0; i < response.length; i++) {
             

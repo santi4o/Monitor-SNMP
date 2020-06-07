@@ -28,6 +28,13 @@ var url = "mongodb://localhost:27017/";
 //var jsonagente = require('./agentinfo.json')
 var fs = require('fs');
 
+
+//--------------------------------opciones de alertas----------------------
+var lim_memoria;
+var lim_cpu;
+var lim_disco;
+var lim_anchoBanda;
+
 //-------------------------------nodemailer--------------------------------
 //process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 var user_email;
@@ -45,9 +52,220 @@ var transporter = nodemailer.createTransport({
 });
 
 
+function enviarAlerta(ip, nombre, mensajes) {
+  var asunto = "Monitor de Red: Alerta en " + nombre;
+  var contenido = "Alerta de monitoreo de red\n"
+                + "Equipo: " + nombre + "\n"
+                + "IP: " + ip + "\n\n";
+  for (var i = 0; i < mensajes.length; i++) {
+    contenido += mensajes[i];
+    contenido += "\n"
+  }
+  var mailOptions = {
+    from: 'monitor@equipo1.com',
+    to: user_email,
+    subject: asunto,
+    text: contenido
+  };
+  transporter.sendMail(mailOptions, function(error, info) {
+    if (error) {
+      console.log(error);
+      res.status(500).send(error);
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
+}
+
 
 /*----------------------Métodos del servidor----------------------------*/
 
+async function updateOptions() {
+  MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("MonitorRed");
+    collection = dbo.collection("alertas");
+    collection.find({}).toArray((error, result) => {
+      if(error) {
+        console.log("ERROR AL ACTUALIZAR LAS OPCIONES DE ALERTAS");
+        return;
+      }
+      if (result.length == 0) {
+        console.log("ERROR: NO HAY OPCIONES DE ALERTAS EN LA BASE DE DATOS");
+        return;
+      }
+      lim_memoria = result[0]["memoria"];
+      lim_cpu = result[0]["cpu"];
+      lim_disco = result[0]["disco"];
+      lim_anchoBanda = result[0]["anchoBanda"];
+      console.log("Opciones de alertas actualizadas");
+    });
+  });
+}
+
+async function checkLimit2(ip, nombre) {
+  return new Promise(function(resolve, reject) {
+    MongoClient.connect(url, function(err, db) {
+      if (err) throw err;
+      var dbo = db.db("MonitorRed");
+      collection = dbo.collection("resourcesUtil");
+      collection.find({"agente":ip})
+        .sort({_id:-1})
+        .limit(1)
+        .toArray((error, resultado) => {
+        if(error) {
+            console.log("HUBO UN ERROR AL OBTENER EL ULTIMO DOCUMENTO DEL AGENTE" + ip);
+            resolve();
+        }
+        if (resultado.length == 0) {
+          console.log("ERROR, NO HAY REGISTROS DEL AGENTE " + ip);
+          resolve();
+        }
+        console.log("again with "  + ip);
+        var memoria = resultado[0]["memoria"];
+        var cpu = resultado[0]["cpu"];
+        var disco;
+        var anchoBanda = [];
+
+        var mensajes = [];
+        var send_email = false;
+
+        console.log(memoria);
+        console.log(cpu);
+
+        if (resultado[0].hasOwnProperty('disco')) {
+          disco = resultado[0]["disco"];
+          console.log(disco);
+        }
+        for (var i = 0; i < resultado[0].anchoBanda.length; i++) {
+          anchoBanda.push(resultado[0].anchoBanda[i]);
+        }
+        for (var i = 0; i < anchoBanda.length; i++) {
+          console.log(anchoBanda[i]);
+        }
+
+        if (memoria > lim_memoria) {
+          send_email = true;
+          mensajes.push("Uso de memoria: " + memoria + "%. Ha rebasado el " + lim_memoria + "%.");
+        }
+        if (cpu > lim_cpu) {
+          send_email = true;
+          mensajes.push("Carga del CPU: " + cpu + ". Ha rebasado el valor de " + lim_cpu + ".");
+        }
+        if (disco != null) {
+          if (disco > lim_disco) {
+            send_email = true;
+            mensajes.push("Uso de almacenamiento: " + disco + "%. Ha rebasado el " + lim_disco + "%.");
+          }
+        }
+
+        for (var x = 0; x < anchoBanda.length; x++) {
+          if (anchoBanda[x].utilizacion > lim_anchoBanda) {
+            send_email = true;
+            mensajes.push("Utilización del ancho de banda en "
+                          + anchoBanda[x].ifDescr + ": " + anchoBanda[x].utilizacion
+                          + ". Ha rebasado el valor de " + lim_anchoBanda + ".");
+          }
+        }
+
+        if (send_email) {
+          console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+          enviarAlerta(ip, nombre, mensajes);
+        }
+
+        //obtener informacion de cada recurso
+        resolve();
+
+      });
+    });
+  });
+}
+
+async function checkLimit() {
+  return new Promise(function(resolve, reject) {
+    MongoClient.connect(url, function(err, db) {
+      if (err) throw err;
+      var dbo = db.db("MonitorRed");
+      collection = dbo.collection("AgentesSNMP");
+      collection.find({}).toArray(async function (error, result) {
+        if(error) {
+            console.log("HUBO UN ERROR AL OBTENER LOS AGENTES");
+            resolve();
+        }
+
+        for (var i = 0; i < result.length; i++) {
+          var ip = result[i]["ip"];
+          var nombre = result[i]["nombre"];
+          console.log("-----------------Información de " + nombre + ", " + ip);
+
+
+          //Buscar el ultdimo documento del uso de recursos para el agente actual
+          await checkLimit2(ip, nombre);
+
+
+        }//fin for (result.length)
+        resolve();
+      });
+    });
+  });
+}
+
+async function snmpTask() {
+  //Nos conectamos a la base de datos para buscar los agentes
+  return new Promise(function(resolve, reject) {
+
+    MongoClient.connect(url, function(err, db) {
+      if (err) throw err;
+      var dbo = db.db("MonitorRed");
+      collection = dbo.collection("AgentesSNMP");
+      collection.find({}).toArray((error, result) => {
+        if(error) {
+            console.log("Error al buscar agentes snmp");
+            resolve();
+        }
+        for (var i = 0; i < result.length; i++) {
+          //preparamos los datos del agente y el nombre del script
+
+          var nombre = result[i]["nombre"];
+          console.log(nombre);
+          var ip = result[i]["ip"];
+          var comunidad = result[i]["comunidad"];
+          var descripcion = result[i].descripcion;
+          var primeraPalabra = descripcion.substr(0, descripcion.indexOf(" "));
+          var script = "";
+          if (primeraPalabra == "Linux") {
+            script = "snmp/snmpResUsageUbuntu.py";
+          } else if (primeraPalabra = "Cisco") {
+            script = "snmp/snmpResUsageCisco.py";
+          } else {
+            console.log("Tipo de sistema desconocido");
+            resolve();
+          }
+          console.log(ip);
+          console.log(comunidad);
+          console.log("script a usar: " + script);
+
+          //ejecución del script para el agente actual
+          const python = spawn('python', [script,
+                                          ip,
+                                          comunidad]);
+
+          python.on('close', (code) => {
+            console.log(`child process close all stdio with code ${code}`);
+            if (code === 0) {
+              console.log("everything ok");
+            } else {
+              console.log("somethig went wrong with the python script");
+            }
+            resolve();
+          });
+
+
+        }
+      });
+    });
+  });
+}
 
 /*----------------------Métodos que renderizan--------------------------*/
 app.get("/", function(req,res){ //Metodo GET, la diagonal invertida representa la página principal
@@ -240,6 +458,7 @@ app.post("/cambiar_opciones", function(req, resp) {
         }
         console.log("1 document inserted");
         db.close();
+        updateOptions();
         resp.end("OK");
       });
 
@@ -544,68 +763,30 @@ app.use(function(req, res, next){
 });
 
 //var minutes = 5, the_interval = minutes * 60 * 1000;
-var snmpTask = function() {
-  //Nos conectamos a la base de datos para buscar los agentes
-  MongoClient.connect(url, function(err, db) {
-    if (err) throw err;
-    var dbo = db.db("MonitorRed");
-    collection = dbo.collection("AgentesSNMP");
-    collection.find({}).toArray((error, result) => {
-      if(error) {
-          return response.status(500).send(error);
-      }
-      for (var i = 0; i < result.length; i++) {
-        //preparamos los datos del agente y el nombre del script
 
-        var nombre = result[i]["nombre"];
-        console.log(nombre);
-        var ip = result[i]["ip"];
-        var comunidad = result[i]["comunidad"];
-        var descripcion = result[i].descripcion;
-        var primeraPalabra = descripcion.substr(0, descripcion.indexOf(" "));
-        var script = "";
-        if (primeraPalabra == "Linux") {
-          script = "snmp/snmpResUsageUbuntu.py";
-        } else if (primeraPalabra = "Cisco") {
-          script = "snmp/snmpResUsageCisco.py";
-        } else {
-          console.log("Tipo de sistema desconocido");
-          res.status(500).send('showAlert');
-        }
-        console.log(ip);
-        console.log(comunidad);
-        console.log("script a usar: " + script);
+//snmpTask();
+//setInterval(snmpTask, 30000);
+//function sleep(ms) {
+//  return new Promise(resolve => setTimeout(resolve, ms));
+//}
 
-        //ejecución del script para el agente actual
-        const python = spawn('python', [script,
-                                        ip,
-                                        comunidad]);
-
-        /*python.stdout.on('data', function (data) {
-          console.log('Pipe data from python script ...');
-          console.log(data.toString())
-          dataToSend = data.toString();
-        });*/
-
-
-        python.on('close', (code) => {
-          console.log(`child process close all stdio with code ${code}`);
-          if (code === 0) {
-            console.log("everything ok");
-          } else {
-            console.log("somethig went wrong with the python script");
-
-          }
-
-        });
-
-
-      }
-      console.log("I am doing my 5 minutes check");
-    });
-  });
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
-snmpTask();
-setInterval(snmpTask, 30000);
+
+
+async function demo() {
+  // Sleep in loop
+  await updateOptions();
+  for (;;) {
+    await snmpTask();
+    await sleep(1000);
+    console.log("done1");
+    await checkLimit();
+    await sleep(10000);
+    console.log("done2");
+  }
+}
+demo();
 
 app.listen(8080); //Puerto de escucha

@@ -5,12 +5,12 @@
   "anchoBanda" : [
     {
       "ifDescr" : "GigabitEthernet0/0",
-      "utilizacion" : 0.000123223338386
+      "utilizacion" : 0.000122650639236
     }
     ,
     {
       "ifDescr" : "GigabitEthernet0/1",
-      "utilizacion" : 1.9614498023e-05
+      "utilizacion" : 3.46683731353e-05
     }
     ,
     {
@@ -23,5 +23,5 @@
       "utilizacion" : 0.0
     }
   ],
-  "date": "2020-06-06 20:50:36.901933"
+  "date": "2020-06-06 20:51:16.600555"
 }

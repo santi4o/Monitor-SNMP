@@ -1,18 +1,18 @@
 {
   "agente" : "192.168.0.2",
-  "cpu" :  0.07 ,
-  "memoria" :  79.0185666343 ,
+  "cpu" :  0.14 ,
+  "memoria" :  93.6698764285 ,
   "disco" :  31 ,
   "anchoBanda" : [
     {
       "ifDescr" : "lo",
-      "utilizacion" : 0.000948175443119
+      "utilizacion" : 0.499376668769
     }
     ,
     {
       "ifDescr" : "Intel Corporation 82545EM Gigabit Ethernet Controller (Copper)",
-      "utilizacion" : 0.000895551706026
+      "utilizacion" : 0.00399487918125
     }
   ],
-  "date": "2020-06-06 20:50:36.840045"
+  "date": "2020-06-07 01:35:05.195724"
 }
