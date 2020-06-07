@@ -112,6 +112,26 @@ app.get("/agentes", function(req, res) { //Metodo GET, la diagonal invertida rep
     }
 });
 
+
+app.get("/umbrales", function(req, res) { //Metodo GET, la diagonal invertida representa la página principal
+    if (String(req.session.user_id) == "undefined") {
+        res.redirect("/");
+    } else{
+      MongoClient.connect(url, function(err, db) {
+        if (err) throw err;
+        var dbo = db.db("MonitorRed");
+        collection = dbo.collection("alertas");
+        collection.find({}).toArray((error, result) => {
+          if(error) {
+              return response.status(500).send(error);
+          }
+          res.json(result);
+        });
+      });
+    }
+});
+
+
 app.get("/admin_agentes", function(req, res) { //Metodo GET, la diagonal invertida representa la página principal
     if (String(req.session.user_id) == "undefined") {
         res.redirect("/");
@@ -187,6 +207,44 @@ app.post("/sendmail", function(req, res) {
         res.end("OK");
       }
     });
+  }
+});
+
+
+
+
+app.post("/cambiar_opciones", function(req, resp) {
+  if (String(req.session.user_id) == "undefined") {
+      res.redirect("/");
+  } else {
+    //console.log(req.body.agente)
+
+    MongoClient.connect(url, function(err, db) {
+      if (err) {
+        throw err;
+        res.status(500).send('showAlert');
+      }
+      var dbo = db.db("MonitorRed");
+      var myobj = {
+                    memoria: req.body.memoria,
+                    cpu: req.body.cpu,
+                    disco: req.body.disco,
+                    anchoBanda: req.body.anchoBanda
+                  };
+      //var myobj = req;
+      dbo.collection("alertas").deleteOne({});
+      dbo.collection("alertas").insertOne(myobj, function(err, res) {
+        if (err) {
+          throw err;
+          res.status(500).send('showAlert');
+        }
+        console.log("1 document inserted");
+        db.close();
+        resp.end("OK");
+      });
+
+    });
+
   }
 });
 

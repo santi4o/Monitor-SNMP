@@ -1,13 +1,85 @@
 extends ../Layout_Users.jade
 block content
-  h2 Configuración de alertas
-  form(method="POST", action="/nuevo_agente", id="form1")
-      center
-          div(class="form-group")
-              label(for="ip_agente") IPv4: 
-              input(type="text", name="agente[ip]", id="ip_agente1", placeholder="X.X.X.X",class="form-control texto")
-          div(class="form-group") 
-              label(for="community") Comunidad: 
-              input(type="text", name="agente[community]", id="community1", placeholder="Comunidad",class="form-control texto")
-          div
-              input(type="submit", value="Verificar Conexión", class="btn btn-success", id="submit1")
+  script.
+      function cambiar() {
+        //$("#info").html("");
+        $("#boton").html("");
+        $("#actual").html("");
+        $("#formOpc").show();
+      }
+      $(document).ready(function() {
+        $("#formOpc").hide();
+        $.getJSON('/umbrales', { get_param: 'value' }, function(json) {
+          console.log(json);
+          $("#memoria").val(json[0]["memoria"]);
+          $("#cpu").val(json[0]["cpu"]);
+          $("#disco").val(json[0]["disco"]);
+          $("#anchoBanda").val(json[0]["anchoBanda"]);
+          var rows = "<tr><td>Memoria (Porcentaje)</td>"
+                    + "<td>" + json[0]['memoria'] + "</td></tr>"
+                    + "<tr><td>Carga del CPU</td>"
+                    + "<td>" + json[0]['cpu'] + "</td></tr>"
+                    + "<tr><td>Almacenamiento (Porcentaje)</td>"
+                    + "<td>" + json[0]['disco'] + "</td></tr>"
+                    + "<tr><td>Utilización del ancho de banda</td>"
+                    + "<td>" + json[0]['anchoBanda'] + "</td></tr>";
+          $('#tbody').append(rows);
+        });
+        
+        
+        $('#formOpc').on('submit', function (e) {
+          
+          $('#submit1').prop('disabled', true);
+          //$(".lds-roller").show();
+          e.preventDefault();
+          //window.location = this.href;
+          var $form = $(e.currentTarget);
+          $.ajax({
+            url: $('#formOpc').attr('action'),
+            method: $('#formOpc').attr('method'),
+            data: $('#formOpc').serialize()
+          })
+          .done(function (response) {
+            console.log(response);
+            $('#submit1').prop('disabled', false);
+            window.location.href = "/opciones_alertas";
+          })
+          .fail(function (response) {
+            console.log(response);
+          });
+          
+        });
+        
+        
+      });
+  div#info
+      h5(style="color: rgba(100,100,100, 0.9)") Si la evaluación del parámetro supera el valor límite se enviará una alerta
+  div#boton
+      button(onclick='cambiar()' class="btn btn-success" id = "cambiar") Cambiar configuración
+  br
+  div#actual
+      table#customers
+          thead
+              tr
+                  th Parámetro
+                  th Valor límite
+          tbody#tbody
+  div#formulario
+      form(method="POST", action="/cambiar_opciones", id="formOpc")
+          div.form-group.row
+              label(for="memoria" class="col-sm-3 col-form-label") Uso de Memoria (%):
+              div.col-sm-2
+                  input(type="number" id="memoria" name="memoria" min="0" max="100" step="0.01" class="form-control")
+          div.form-group.row
+              label(for="cpu" class="col-sm-3 col-form-label") Carga del CPU:
+              div.col-sm-2
+                  input(type="number" id="cpu" name="cpu" min="0" class="form-control" step="0.01")
+          div.form-group.row
+              label(for="disco" class="col-sm-3 col-form-label") Uso del Almacenamiento (%):
+              div.col-sm-2
+                  input(type="number" id="disco" name="disco" min="0" max="100" class="form-control" step="0.01")
+          div.form-group.row
+              label(for="anchoBanda" class="col-sm-3 col-form-label") Utilización del ancho de banda:
+              div.col-sm-2
+                  input(type="number" id="anchoBanda" name="anchoBanda" min="0" class="form-control" step="0.01")
+          input(type="submit", value="Guardar", class="btn btn-success", id="submit1")
