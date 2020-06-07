@@ -93,10 +93,10 @@ ifOctets1 = db.ifOctets.find_one(
 interfacesInfo = snmpGet(sys.argv[1], sys.argv[2])
 end = time.time()
 
-for interface in interfacesInfo:
-    print "\ninterfaz: ", interface[3][1]
-    print "ifInOctets_2: ", interface[0][1]
-    print "ifOutOctets_2: ", interface[1][1]
+#for interface in interfacesInfo:
+#    print "\ninterfaz: ", interface[3][1]
+#    print "ifInOctets_2: ", interface[0][1]
+#    print "ifOutOctets_2: ", interface[1][1]
 
 ##interfacesInfo.pop()
 ##print "\n-----------------------\n", "numero de interfaces: ", len(interfacesInfo)
@@ -106,7 +106,7 @@ if (ifOctets1 is None):
 	print "Informacion del ancho de banda establecida en 0\n"
 
 else:
-    pprint(ifOctets1)
+    #pprint(ifOctets1)
     #print "size is: ", ifOctets1.count()
     #checa que el nombre de las interfaces coincida y guarda la informacion en los arreglos de arriba
     start = float(ifOctets1['tiempo'])
@@ -126,7 +126,7 @@ else:
 
     #interfaceobjs = []
 
-    print "\n\tmedido con half duplex:\n"
+    #print "\n\tmedido con half duplex:\n"
     #acum = 0.0         ------util para calcular un promedio de utilizacion de ancho de banda en el dispositivo
     for x in range(len(interfacesInfo)):
         util.append((((ifIn2[x]-ifIn1[x]) + (ifOut2[x]-ifOut1[x])) * 8 * 100) / (delta_secs * ifSpeeds[x]))
@@ -135,7 +135,7 @@ else:
 
 print len(ifDescrs), "=", len(util)
 console = sys.stdout
-sys.stdout = open('agentInterfacesTemp.json', 'w')
+sys.stdout = open('agentInterfacesTemp_' + sys.argv[1] + '.json', 'w')
 print '{'
 print '  "agente" : "{}",'.format(sys.argv[1])
 print '  "tiempo" : ', end, ','
@@ -151,7 +151,7 @@ for x in range(len(interfacesInfo)):
 print "  ]"
 print "}"
 sys.stdout = console
-with open('agentInterfacesTemp.json') as f:
+with open('agentInterfacesTemp_' + sys.argv[1] + '.json') as f:
     file_data = json.load(f)
 result = db.ifOctets.insert_one(file_data)
 print('Inserted document as {0}'.format(result.inserted_id))
@@ -165,7 +165,7 @@ libre = float(cpu_mem[2][1])
 total = float(cpu_mem[3][1])
 memUtil = ((total-libre) / total) * 100
 
-sys.stdout = open('resourcesUtil.json', 'w')
+sys.stdout = open('resourcesUtil_' + sys.argv[1] + '.json', 'w')
 print '{'
 print '  "agente" : "{}",'.format(sys.argv[1])
 print '  "cpu" : ', cpu_mem[0][1], ','
@@ -194,7 +194,7 @@ print '  "date": "{}"'.format(currentDT)
 print "}"
 
 sys.stdout = console
-with open('resourcesUtil.json') as f:
+with open('resourcesUtil_' + sys.argv[1] + '.json') as f:
     file_data = json.load(f)
 result = db.resourcesUtil.insert_one(file_data)
 print('Inserted document as {0}'.format(result.inserted_id))

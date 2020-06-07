@@ -277,6 +277,30 @@ app.post("/resourcesUtil", function(req, res) {
 app.post("/newResourcesUtil", function(req, res) {
 
   if (String(req.session.user_id) == "undefined") {
+    res.redirect("/");
+  } else {
+    MongoClient.connect(url, function(err, db) {
+      if (err) throw err;
+      var dbo = db.db("MonitorRed");
+      collection = dbo.collection("resourcesUtil");
+      collection.find({"agente":req.body.agente})
+        .sort({_id:-1})
+        .limit(1)
+        .toArray((error, result) => {
+        if(error) {
+            return response.status(500).send(error);
+        }
+        console.log("enviando resourcesUtil (last) del agente");
+        res.json(result);
+      });
+    });
+  }
+});
+
+
+/*app.post("/newResourcesUtil", function(req, res) {
+
+  if (String(req.session.user_id) == "undefined") {
       res.redirect("/");
   } else {
     console.log(req.body.agente);
@@ -357,7 +381,10 @@ app.post("/newResourcesUtil", function(req, res) {
 
 
   }
-});
+});*/
+
+
+
 
 /*----------------------Métodos de funcionalidad (HTTP)------------------------*/
 
@@ -515,5 +542,70 @@ app.use(function(req, res, next){
   res.status(404);
   res.render("no_encontrada");
 });
+
+//var minutes = 5, the_interval = minutes * 60 * 1000;
+var snmpTask = function() {
+  //Nos conectamos a la base de datos para buscar los agentes
+  MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("MonitorRed");
+    collection = dbo.collection("AgentesSNMP");
+    collection.find({}).toArray((error, result) => {
+      if(error) {
+          return response.status(500).send(error);
+      }
+      for (var i = 0; i < result.length; i++) {
+        //preparamos los datos del agente y el nombre del script
+
+        var nombre = result[i]["nombre"];
+        console.log(nombre);
+        var ip = result[i]["ip"];
+        var comunidad = result[i]["comunidad"];
+        var descripcion = result[i].descripcion;
+        var primeraPalabra = descripcion.substr(0, descripcion.indexOf(" "));
+        var script = "";
+        if (primeraPalabra == "Linux") {
+          script = "snmp/snmpResUsageUbuntu.py";
+        } else if (primeraPalabra = "Cisco") {
+          script = "snmp/snmpResUsageCisco.py";
+        } else {
+          console.log("Tipo de sistema desconocido");
+          res.status(500).send('showAlert');
+        }
+        console.log(ip);
+        console.log(comunidad);
+        console.log("script a usar: " + script);
+
+        //ejecución del script para el agente actual
+        const python = spawn('python', [script,
+                                        ip,
+                                        comunidad]);
+
+        /*python.stdout.on('data', function (data) {
+          console.log('Pipe data from python script ...');
+          console.log(data.toString())
+          dataToSend = data.toString();
+        });*/
+
+
+        python.on('close', (code) => {
+          console.log(`child process close all stdio with code ${code}`);
+          if (code === 0) {
+            console.log("everything ok");
+          } else {
+            console.log("somethig went wrong with the python script");
+
+          }
+
+        });
+
+
+      }
+      console.log("I am doing my 5 minutes check");
+    });
+  });
+}
+snmpTask();
+setInterval(snmpTask, 30000);
 
 app.listen(8080); //Puerto de escucha
