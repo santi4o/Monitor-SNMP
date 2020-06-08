@@ -34,7 +34,7 @@ var lim_memoria;
 var lim_cpu;
 var lim_disco;
 var lim_anchoBanda;
-
+var not_again = [];
 //-------------------------------nodemailer--------------------------------
 //process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 var user_email;
@@ -52,25 +52,33 @@ var transporter = nodemailer.createTransport({
 });
 
 
-function enviarAlerta(ip, nombre, mensajes) {
+function enviarAlerta(ip, nombre, mensajes, date) {
   var asunto = "Monitor de Red: Alerta en " + nombre;
-  var contenido = "Alerta de monitoreo de red\n"
-                + "Equipo: " + nombre + "\n"
-                + "IP: " + ip + "\n\n";
+  var contenido = "<center style='color:red'><h4>Alerta de monitoreo de red</h4></center>"
+                + "<i>"
+                + "Equipo: " + nombre + "<br>"
+                + "IP: " + ip + "<br>"
+                + "fecha y hora: " + date + "<br>"
+                + "</i><ul>";
   for (var i = 0; i < mensajes.length; i++) {
-    contenido += mensajes[i];
-    contenido += "\n"
+    contenido += "<li>" + mensajes[i] + "</li>";
   }
+  contenido += "</ul><center><img src='cid:unique@cid'></center>";
   var mailOptions = {
     from: 'monitor@equipo1.com',
     to: user_email,
     subject: asunto,
-    text: contenido
+    //text: contenido,
+    html: contenido,
+    attachments: [{
+          filename: 'icon1_sm.png',
+          path: __dirname + '/public/images/icon1.png',
+          cid: 'unique@cid'
+      }],
   };
   transporter.sendMail(mailOptions, function(error, info) {
     if (error) {
       console.log(error);
-      res.status(500).send(error);
     } else {
       console.log('Email sent: ' + info.response);
     }
@@ -120,6 +128,7 @@ async function checkLimit2(ip, nombre) {
         if (resultado.length == 0) {
           console.log("ERROR, NO HAY REGISTROS DEL AGENTE " + ip);
           resolve();
+          return;
         }
         console.log("again with "  + ip);
         var memoria = resultado[0]["memoria"];
@@ -168,9 +177,37 @@ async function checkLimit2(ip, nombre) {
           }
         }
 
+        for (var i = 0; i < not_again.length; i++) {
+          if (not_again[i]["ip"] == ip) {
+            if (not_again[i]["date"] == resultado[0]["date"]) {
+              send_email = false;
+            }
+          }
+        }
+        console.log("###########      " + not_again.length + "         ############");
         if (send_email) {
-          console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-          enviarAlerta(ip, nombre, mensajes);
+          if (not_again.length == 0) {
+            not_again.push({
+              ip: ip,
+              date: resultado[0]["date"]
+            });
+          } else {
+            var updated = false;
+            for (var x = 0; x < not_again.length; x++) {
+              if (not_again[x]["ip"] == ip) {
+                updated = true;
+                not_again[x]["date"] = resultado[0]["date"];
+              }
+            }
+            if (!updated) {
+              not_again.push({
+                ip: ip,
+                date: resultado[0]["date"]
+              });
+            }
+          }
+          console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+          enviarAlerta(ip, nombre, mensajes, resultado[0]["date"]);
         }
 
         //obtener informacion de cada recurso
@@ -210,6 +247,25 @@ async function checkLimit() {
   });
 }
 
+function pythonScript(script, ip, nombre, comunidad) {
+  const python = spawn('python', [script,
+                                  ip,
+                                  comunidad]);
+
+  python.on('close', (code) => {
+    console.log(`child process close all stdio with code ${code}`);
+    if (code === 0) {
+      console.log("everything ok with " + nombre);
+    } else {
+      console.log("somethig went wrong with the python script: " + nombre);
+      var fecha = new Date().toLocaleString();
+      var mensajes = ["El agente SNMP no ha respondido en el tiempo límite"];
+      enviarAlerta(ip, nombre, mensajes, fecha);
+    }
+    //resolve();
+  });
+}
+
 async function snmpTask() {
   //Nos conectamos a la base de datos para buscar los agentes
   return new Promise(function(resolve, reject) {
@@ -246,22 +302,12 @@ async function snmpTask() {
           console.log("script a usar: " + script);
 
           //ejecución del script para el agente actual
-          const python = spawn('python', [script,
-                                          ip,
-                                          comunidad]);
+          pythonScript(script, ip, nombre, comunidad);
 
-          python.on('close', (code) => {
-            console.log(`child process close all stdio with code ${code}`);
-            if (code === 0) {
-              console.log("everything ok");
-            } else {
-              console.log("somethig went wrong with the python script");
-            }
-            resolve();
-          });
 
 
         }
+        resolve();
       });
     });
   });
@@ -780,7 +826,7 @@ async function demo() {
   await updateOptions();
   for (;;) {
     await snmpTask();
-    await sleep(1000);
+    await sleep(20000);
     console.log("done1");
     await checkLimit();
     await sleep(10000);

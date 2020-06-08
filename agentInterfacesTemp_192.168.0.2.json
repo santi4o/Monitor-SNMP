@@ -1,17 +1,17 @@
 {
   "agente" : "192.168.0.2",
-  "tiempo" :  1591511704.65 ,
+  "tiempo" :  1591601001.62 ,
   "interfacesInfo" : [
     {
       "ifDescr" : "lo",
-      "ifInOctets" :  5264196.0 ,
-      "ifOutOctets" :  5264196.0
+      "ifInOctets" :  15925105.0 ,
+      "ifOutOctets" :  15925105.0
     }
     ,
     {
       "ifDescr" : "Intel Corporation 82545EM Gigabit Ethernet Controller (Copper)",
-      "ifInOctets" :  7155050.0 ,
-      "ifOutOctets" :  4194570.0
+      "ifInOctets" :  17090446.0 ,
+      "ifOutOctets" :  10026621.0
     }
   ]
 }
