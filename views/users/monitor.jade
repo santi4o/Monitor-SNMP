@@ -222,10 +222,11 @@ block content
       if (id != idAgente) {
         return;
       }
-      addData();
+    
       setTimeout(function() {
+        addData();
         writeNext(id);
-      }, 20000);
+      }, 10000); ///////////////////////////////tiempo de espera para la siguiente actualizacion
     }
     
     
@@ -350,24 +351,24 @@ block content
           //rellena con 0 los lugares sin datos
           for (i = 0; i < 10; i++) {
             if (i >= memvalues.length) {
-              memvalues.push(0);
+              memvalues.push(null);
             }
             if (i >= cpuvalues.length) {
-              cpuvalues.push(0);
+              cpuvalues.push(null);
             }
             if (i >= dateLabels.length) {
-              dateLabels.push(0);
+              dateLabels.push(' ');
             }
             if (hasDiskChart) {
               if (i >= diskvalues.length) {
-                diskvalues.push(0);
+                diskvalues.push(null);
               }
             }
           }
           for (var i = 0; i < bwdatasets.length; i++) {
             for (var x = 0; x < 10; x++) {
               if (x >= bwdatasets[i].data.length) {
-                bwdatasets[i].data.push(0);
+                bwdatasets[i].data.push(null);
               }
             }
           }

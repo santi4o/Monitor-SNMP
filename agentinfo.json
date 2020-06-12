@@ -1,1 +1,1 @@
-{"sysName": "R1", "sysDescr": "Cisco IOS Software, IOSv Software (VIOS-ADVENTERPRISEK9-M), Version 15.6(2)T, RELEASE SOFTWARE (fc2)\r\nTechnical Support: http://www.cisco.com/techsupport\r\nCopyright (c) 1986-2016 by Cisco Systems, Inc.\r\nCompiled Tue 22-Mar-16 16:19 by prod_rel_team", "ifDescr": "GigabitEthernet0/0"}
+{"sysName": "ubuntu", "sysDescr": "Linux ubuntu 5.3.0-28-generic #30~18.04.1-Ubuntu SMP Fri Jan 17 06:14:09 UTC 2020 x86_64", "ifDescr": "lo"}

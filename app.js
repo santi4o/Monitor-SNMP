@@ -826,13 +826,13 @@ async function demo() {
   await updateOptions();
   for (;;) {
     await snmpTask();
-    await sleep(20000);
-    console.log("done1");
+    await sleep(30000);
+    console.log("SNMP SCRIPTS EXECUTION FINISHED");
     await checkLimit();
-    await sleep(10000);
-    console.log("done2");
+    await sleep(270000);
+    console.log("5 MINUTES TIMEOUT REACHED");
   }
 }
 demo();
 
-app.listen(8080); //Puerto de escucha
+app.listen(80); //Puerto de escucha
