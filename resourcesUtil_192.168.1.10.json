@@ -1,21 +1,21 @@
 {
-  "agente" : "192.168.200.1",
+  "agente" : "192.168.1.10",
   "cpu" :  0 ,
-  "memoria" :  30.2261075873 ,
+  "memoria" :  30.2060044704 ,
   "anchoBanda" : [
     {
       "ifDescr" : "GigabitEthernet0/0",
-      "utilizacion" : 0.00015352487104
+      "utilizacion" : 0.00213374225135
     }
     ,
     {
       "ifDescr" : "GigabitEthernet0/1",
-      "utilizacion" : 0.00213687157821
+      "utilizacion" : 0.00254344917505
     }
     ,
     {
       "ifDescr" : "GigabitEthernet0/2",
-      "utilizacion" : 0.00225041626445
+      "utilizacion" : 0.0043462354744
     }
     ,
     {
@@ -23,5 +23,5 @@
       "utilizacion" : 0.0
     }
   ],
-  "date": "2020-06-12 16:55:22.183341"
+  "date": "2020-06-12 16:55:22.213198"
 }
